@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using AITeacherAssistant.Services;
 
@@ -82,9 +83,11 @@ public partial class StartupWindow : Window
             StatusText.Foreground = new System.Windows.Media.SolidColorBrush(
                 System.Windows.Media.Colors.Green);
             
-            // Hide back to menu button and show begin session button
+            // Hide back to menu button
             BackToMenuButton.Visibility = Visibility.Collapsed;
-            BeginSessionButton.Visibility = Visibility.Visible;
+            
+            // Start the connection animation
+            StartConnectionAnimation();
         });
     }
     
@@ -102,10 +105,60 @@ public partial class StartupWindow : Window
             StatusText.Foreground = new System.Windows.Media.SolidColorBrush(
                 System.Windows.Media.Colors.Gray);
             
-            // Hide begin session button and show back to menu button
-            BeginSessionButton.Visibility = Visibility.Collapsed;
+            // Show back to menu button
             BackToMenuButton.Visibility = Visibility.Visible;
         });
+    }
+    
+    /// <summary>
+    /// Start the connection animation and auto-route to overlay
+    /// </summary>
+    private void StartConnectionAnimation()
+    {
+        var animation = (Storyboard)FindResource("ConnectionAnimation");
+        if (animation != null)
+        {
+            // Start the animation
+            animation.Begin();
+            
+            // Auto-route to overlay after animation completes and showing for 3 seconds
+            var timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(4.0) // 1.0s animation + 3s display time
+            };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                NavigateToOverlay();
+            };
+            timer.Start();
+        }
+        else
+        {
+            // Fallback if animation resource not found
+            NavigateToOverlay();
+        }
+    }
+    
+    /// <summary>
+    /// Navigate to the overlay (MainWindow)
+    /// </summary>
+    private void NavigateToOverlay()
+    {
+        try
+        {
+            // Create and show the main overlay window
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+            
+            // Close this startup window
+            this.Close();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error starting overlay: {ex.Message}", "Error", 
+                          MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
     
     
@@ -133,26 +186,6 @@ public partial class StartupWindow : Window
         }
     }
     
-    /// <summary>
-    /// Begin session button click handler
-    /// </summary>
-    private void BeginSessionButton_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            // Create and show the main overlay window
-            var mainWindow = new MainWindow();
-            mainWindow.Show();
-            
-            // Close this startup window
-            this.Close();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error starting session: {ex.Message}", "Error", 
-                          MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
     
     /// <summary>
     /// Start polling for session connection status

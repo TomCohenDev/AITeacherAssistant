@@ -47,9 +47,8 @@ public class ApiService
             System.Diagnostics.Debug.WriteLine($"Sending payload: {json}");
             System.Diagnostics.Debug.WriteLine($"API URL: {fullUrl}");
             System.Diagnostics.Debug.WriteLine($"HttpClient configured: {_httpClient != null}");
-            System.Diagnostics.Debug.WriteLine($"HttpClient BaseAddress: {_httpClient.BaseAddress?.ToString() ?? "null"}");
 
-            var response = await _httpClient.PostAsync(fullUrl, content);
+            var response = await _httpClient!.PostAsync(fullUrl, content);
             
             // Read the response content for debugging
             var responseContent = await response.Content.ReadAsStringAsync();

@@ -15,6 +15,36 @@
         SizeToContent="WidthAndHeight">
     
     <Window.Resources>
+        <!-- Animation Storyboards -->
+        <Storyboard x:Key="ConnectionAnimation" RepeatBehavior="1x">
+            <!-- Fade out QR Code -->
+            <DoubleAnimation Storyboard.TargetName="QRCodeImage"
+                           Storyboard.TargetProperty="Opacity"
+                           From="1" To="0"
+                           Duration="0:0:0.4"/>
+            
+            <!-- Fade in Checkmark -->
+            <DoubleAnimation Storyboard.TargetName="CheckmarkImage"
+                           Storyboard.TargetProperty="Opacity"
+                           From="0" To="1"
+                           BeginTime="0:0:0.2"
+                           Duration="0:0:0.4"/>
+            
+            <!-- Fade out Session Code -->
+            <DoubleAnimation Storyboard.TargetName="SessionCodeText"
+                           Storyboard.TargetProperty="Opacity"
+                           From="1" To="0"
+                           BeginTime="0:0:0.4"
+                           Duration="0:0:0.3"/>
+            
+            <!-- Fade in Connected Text -->
+            <DoubleAnimation Storyboard.TargetName="ConnectedText"
+                           Storyboard.TargetProperty="Opacity"
+                           From="0" To="1"
+                           BeginTime="0:0:0.6"
+                           Duration="0:0:0.4"/>
+        </Storyboard>
+        
         <!-- Modern Button Style -->
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="#667eea"/>
@@ -136,14 +166,35 @@
                             HorizontalAlignment="Center"
                             Margin="0,0,0,20">
                         <StackPanel HorizontalAlignment="Center">
-                            <!-- QR Code Image -->
+                            <!-- QR Code Image Container -->
                             <Border Background="White" 
                                     CornerRadius="12" 
                                     Padding="20">
-                                <Image x:Name="QRCodeImage" 
-                                     Width="300" 
-                                     Height="300" 
-                                     Stretch="Uniform"/>
+                                <Grid>
+                                    <!-- QR Code Image -->
+                                    <Image x:Name="QRCodeImage" 
+                                         Width="300" 
+                                         Height="300" 
+                                         Stretch="Uniform"
+                                         Opacity="1"/>
+                                    
+                                    <!-- Checkmark Container (initially hidden) -->
+                                    <Grid x:Name="CheckmarkImage" 
+                                          Width="300" 
+                                          Height="300" 
+                                          Opacity="0">
+                                        <Border Background="#48bb78" 
+                                                CornerRadius="12" 
+                                                Width="300" 
+                                                Height="300"/>
+                                        <TextBlock Text="✓" 
+                                                   FontSize="120" 
+                                                   FontWeight="Bold" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Grid>
                             </Border>
                             
                             <!-- Manual Code Entry -->
@@ -154,20 +205,34 @@
                                          HorizontalAlignment="Center"
                                          Margin="0,0,0,8"/>
                                 
-                                <!-- Code Display -->
-                                <Border Background="White" 
-                                        CornerRadius="8" 
-                                        Padding="20,15" 
-                                        BorderBrush="#e2e8f0" 
-                                        BorderThickness="2">
-                                    <TextBlock x:Name="SessionCodeText" 
-                                             Text="A B C D E" 
-                                             FontFamily="Consolas" 
-                                             FontSize="36" 
-                                             FontWeight="Bold" 
-                                             Foreground="#2d3748" 
-                                             HorizontalAlignment="Center"/>
-                                </Border>
+                                <!-- Code Display Container -->
+                                <Grid>
+                                    <!-- Original Code Display -->
+                                    <Border x:Name="CodeBorder"
+                                            Background="White" 
+                                            CornerRadius="8" 
+                                            Padding="20,15" 
+                                            BorderBrush="#e2e8f0" 
+                                            BorderThickness="2">
+                                        <TextBlock x:Name="SessionCodeText" 
+                                                 Text="A B C D E" 
+                                                 FontFamily="Consolas" 
+                                                 FontSize="36" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="#2d3748" 
+                                                 HorizontalAlignment="Center"/>
+                                    </Border>
+                                    
+                                    <!-- Connected Text (initially hidden) -->
+                                    <TextBlock x:Name="ConnectedText"
+                                             Text="CONNECTED"
+                                             FontSize="32"
+                                             FontWeight="Bold"
+                                             Foreground="#48bb78"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             Opacity="0"/>
+                                </Grid>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -201,14 +266,6 @@
                               Margin="0,10,0,0"
                               Visibility="Visible"/>
                         
-                        <!-- Begin Session Button (shown after connection) -->
-                        <Button x:Name="BeginSessionButton" 
-                              Content="🚀 Begin Session" 
-                              Style="{StaticResource SuccessButton}" 
-                              Click="BeginSessionButton_Click"
-                              HorizontalAlignment="Center"
-                              Margin="0,10,0,0"
-                              Visibility="Collapsed"/>
                     </StackPanel>
                     
                     <!-- Footer Info -->
