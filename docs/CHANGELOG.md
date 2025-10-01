@@ -4,6 +4,65 @@ All notable changes to the AI Teacher Assistant project will be documented in th
 
 ---
 
+## [Date: 2025-10-01 17:00 - Startup Window with QR Code Implementation]
+
+### Added
+- **Startup Window with QR Code**: Complete startup flow for user connection
+  - Modern, attractive UI with gradient background and card layout
+  - QR code generation using QRCoder library (300x300px)
+  - 5-letter session code display with monospace formatting
+  - Connection status indicator with colored dot
+  - Test connection button for development
+  - Begin session button (appears after connection)
+  - Invisible scrolling with hidden scrollbar
+
+- **Session Management Service**: Complete session handling system
+  - Random 5-letter code generation (A-Z only)
+  - Session state management (connected/disconnected)
+  - Event-driven architecture for connection status
+  - JSON payload generation for QR codes
+  - Test simulation functionality
+
+- **QR Code Generation Service**: Professional QR code creation
+  - QRCoder NuGet package integration
+  - BitmapImage conversion for WPF display
+  - Configurable QR code size
+  - Session-specific QR code generation
+  - Error handling for QR generation
+
+- **Application Flow**: Complete startup-to-overlay workflow
+  - StartupWindow as application entry point
+  - Session code generation on startup
+  - QR code display with proper formatting
+  - Connection simulation for testing
+  - Seamless transition to MainWindow overlay
+
+### Changed
+- **Application Startup**: Changed from MainWindow to StartupWindow
+  - App.xaml StartupUri updated to src/Views/StartupWindow.xaml
+  - MainWindow now launched from StartupWindow after connection
+
+- **Window Sizing**: Optimized startup window dimensions
+  - Initial size: 600x700px
+  - Final size: 650x900px (user adjusted)
+  - Invisible scrolling for content overflow
+
+### Fixed
+- **Content Visibility**: Resolved content cutoff issues
+  - Increased window height to accommodate all content
+  - Added invisible scrolling as backup
+  - Optimized margins and spacing
+
+### Files Modified
+- `src/Views/StartupWindow.xaml` (created - modern UI design)
+- `src/Views/StartupWindow.xaml.cs` (created - logic and event handlers)
+- `src/Services/SessionService.cs` (created - session management)
+- `src/Services/QRCodeService.cs` (created - QR code generation)
+- `App.xaml` (updated StartupUri)
+- `AITeacherAssistant.csproj` (added QRCoder package reference)
+
+---
+
 ## [Date: 2025-10-01 16:25 - Click-Through Bug Fix (Simplified)]
 
 ### Fixed

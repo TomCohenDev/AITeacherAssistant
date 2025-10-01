@@ -32,13 +32,17 @@ AITeacherAssistant/
 ├── src/                         # Source code
 │   ├── Views/                   # XAML Windows and User Controls
 │   │   ├── MainWindow.xaml      # Main overlay window UI definition
-│   │   └── MainWindow.xaml.cs   # Main overlay window code-behind
+│   │   ├── MainWindow.xaml.cs   # Main overlay window code-behind
+│   │   ├── StartupWindow.xaml   # Startup window with QR code UI
+│   │   └── StartupWindow.xaml.cs # Startup window code-behind
 │   │
 │   ├── ViewModels/              # MVVM ViewModels (future)
 │   │
 │   ├── Models/                  # Data models (future)
 │   │
-│   ├── Services/                # Business logic services (future)
+│   ├── Services/                # Business logic services
+│   │   ├── SessionService.cs    # Session management and code generation
+│   │   └── QRCodeService.cs     # QR code generation service
 │   │
 │   ├── Utilities/               # Helper classes (future)
 │   │
@@ -92,6 +96,73 @@ AITeacherAssistant/
 - `ControlPanel_MouseLeave()`: Re-enables click-through when leaving control panel
 - `StatusIndicator_MouseEnter()`: Disables click-through when hovering over status indicator
 - `StatusIndicator_MouseLeave()`: Re-enables click-through when leaving status indicator
+
+### 2. StartupWindow (src/Views/StartupWindow.xaml / src/Views/StartupWindow.xaml.cs)
+
+**Purpose**: Initial connection window for users to join sessions via QR code or session code.
+
+**Namespace**: `AITeacherAssistant.Views`
+
+**Key Responsibilities**:
+- Display modern, attractive UI for user connection
+- Generate and display QR codes for mobile scanning
+- Show 5-letter session codes for manual entry
+- Manage connection status and user feedback
+- Handle transition to MainWindow after connection
+
+**Key Properties**:
+- `Height="900" Width="650"`: Optimized window size
+- `ResizeMode="NoResize"`: Fixed window size
+- `WindowStartupLocation="CenterScreen"`: Centered on screen
+- `Background="#F5F7FA"`: Light background color
+
+**Key Methods**:
+- `StartupWindow_Loaded()`: Initialize session and generate QR code
+- `OnUserConnected()`: Handle user connection event
+- `OnUserDisconnected()`: Handle user disconnection event
+- `TestConnectionButton_Click()`: Simulate connection for testing
+- `BeginSessionButton_Click()`: Launch MainWindow and close startup
+
+### 3. SessionService (src/Services/SessionService.cs)
+
+**Purpose**: Manages session codes and connection state.
+
+**Namespace**: `AITeacherAssistant.Services`
+
+**Key Responsibilities**:
+- Generate random 5-letter session codes (A-Z)
+- Track connection state (connected/disconnected)
+- Provide events for connection status changes
+- Generate JSON payload for QR codes
+
+**Key Properties**:
+- `CurrentSessionCode`: Current 5-letter session code
+- `IsUserConnected`: Boolean connection state
+
+**Key Methods**:
+- `GenerateSessionCode()`: Create random 5-letter code
+- `CreateNewSession()`: Generate new session and return code
+- `MarkUserConnected()`: Set user as connected
+- `MarkUserDisconnected()`: Set user as disconnected
+- `SimulateUserConnection()`: Test connection simulation
+- `GetQRCodePayload()`: Generate JSON for QR code
+
+### 4. QRCodeService (src/Services/QRCodeService.cs)
+
+**Purpose**: Generates QR codes using QRCoder library.
+
+**Namespace**: `AITeacherAssistant.Services`
+
+**Key Responsibilities**:
+- Generate QR codes from text data
+- Convert System.Drawing.Bitmap to WPF BitmapImage
+- Handle QR code sizing and formatting
+- Generate session-specific QR codes
+
+**Key Methods**:
+- `GenerateQRCode(string data, int size)`: Generate QR code from text
+- `GenerateSessionQRCode(string sessionCode, int size)`: Generate session QR code
+- `ConvertToBitmapImage(Bitmap bitmap)`: Convert to WPF-compatible image
 
 ---
 
@@ -175,11 +246,31 @@ WPF transparency is achieved through:
 
 ---
 
-## Component Interaction Flow
+## Application Flow
 
+### Startup to Overlay Flow
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   MainWindow                        │
+│                Application Start                    │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                StartupWindow                        │
+│  ┌───────────────────────────────────────────────┐ │
+│  │         Modern UI Card                        │ │
+│  │  - App Logo & Title                          │ │
+│  │  - QR Code (300x300px)                       │ │
+│  │  - Session Code (5 letters)                  │ │
+│  │  - Connection Status                         │ │
+│  │  - Test/Begin Buttons                        │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      │ User Connects (QR/Code)
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                MainWindow (Overlay)                 │
 │  ┌───────────────────────────────────────────────┐ │
 │  │         Transparent Overlay Grid              │ │
 │  │                                               │ │
@@ -190,6 +281,53 @@ WPF transparency is achieved through:
 │  │  │  - Close Button  │                        │ │
 │  │  └──────────────────┘                        │ │
 │  │                                               │ │
+│  │                        ┌──────────────────┐  │ │
+│  │                        │ Status Indicator │  │ │
+│  │                        │ - Status Dot     │  │ │
+│  │ (Bottom-Left)          │ - Status Text    │  │ │
+│  │                        └──────────────────┘  │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+## Component Interaction Flow
+
+### Service Layer Interactions
+```
+┌─────────────────────────────────────────────────────┐
+│                StartupWindow                        │
+│  ┌───────────────────────────────────────────────┐ │
+│  │         UI Components                         │ │
+│  │  - QR Code Image                             │ │
+│  │  - Session Code Text                         │ │
+│  │  - Status Indicator                          │ │
+│  │  - Action Buttons                            │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                Service Layer                        │
+│  ┌─────────────────┐    ┌─────────────────────────┐ │
+│  │ SessionService  │    │    QRCodeService        │ │
+│  │ - Generate Code │    │ - Generate QR Code      │ │
+│  │ - Track State   │    │ - Convert to Bitmap     │ │
+│  │ - Events        │    │ - Error Handling        │ │
+│  └─────────────────┘    └─────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                MainWindow (Overlay)                 │
+│  ┌───────────────────────────────────────────────┐ │
+│  │         Transparent Overlay Grid              │ │
+│  │                                               │ │
+│  │  ┌──────────────────┐                        │ │
+│  │  │  Control Panel   │ (Top-Right)            │ │
+│  │  │  - Title         │                        │ │
+│  │  │  - Help Text     │                        │ │
+│  │  │  - Close Button  │                        │ │
+│  │  └──────────────────┘                        │ │
 │  │                                               │ │
 │  │                        ┌──────────────────┐  │ │
 │  │                        │ Status Indicator │  │ │
@@ -250,12 +388,13 @@ WPF transparency is achieved through:
 - **.NET 9.0 SDK**: Core framework
 - **WPF**: UI framework (included in .NET)
 - **Win32 API**: Native Windows functionality via P/Invoke
+- **QRCoder 1.6.0**: QR code generation library
+- **System.Drawing.Common**: Required by QRCoder for bitmap operations
 
 ### Planned Dependencies
 
 - **System.Net.Http**: For HTTP API calls
 - **Newtonsoft.Json** or **System.Text.Json**: JSON serialization
-- **QRCoder** or similar: QR code generation
 - **Microsoft.Toolkit.Wpf**: Modern WPF controls (optional)
 
 ---

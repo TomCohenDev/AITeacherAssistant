@@ -19,3 +19,8 @@ C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\AITeacherA
 C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\ref\AITeacherAssistant.dll
 C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\MainWindow.g.cs
 C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\MainWindow.baml
+C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\AITeacherAssistant.csproj.AssemblyReference.cache
+C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\StartupWindow.g.cs
+C:\Users\tomco\github\ita\AITeacherAssistant\bin\Debug\net9.0-windows\QRCoder.dll
+C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\StartupWindow.baml
+C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\AITeache.4E7A0158.Up2Date
