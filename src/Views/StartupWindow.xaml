@@ -163,7 +163,7 @@
                                     <TextBlock x:Name="SessionCodeText" 
                                              Text="A B C D E" 
                                              FontFamily="Consolas" 
-                                             FontSize="28" 
+                                             FontSize="36" 
                                              FontWeight="Bold" 
                                              Foreground="#2d3748" 
                                              HorizontalAlignment="Center"/>
@@ -192,12 +192,22 @@
                         </StackPanel>
                         
                         
+                        <!-- Back to Menu Button -->
+                        <Button x:Name="BackToMenuButton" 
+                              Content="⬅️ Back to Menu" 
+                              Style="{StaticResource ModernButton}" 
+                              Click="BackToMenuButton_Click"
+                              HorizontalAlignment="Center"
+                              Margin="0,10,0,0"
+                              Visibility="Visible"/>
+                        
                         <!-- Begin Session Button (shown after connection) -->
                         <Button x:Name="BeginSessionButton" 
                               Content="🚀 Begin Session" 
                               Style="{StaticResource SuccessButton}" 
                               Click="BeginSessionButton_Click"
                               HorizontalAlignment="Center"
+                              Margin="0,10,0,0"
                               Visibility="Collapsed"/>
                     </StackPanel>
                     

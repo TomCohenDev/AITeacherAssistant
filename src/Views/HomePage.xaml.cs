@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using AITeacherAssistant.Services;
 
@@ -36,12 +37,8 @@ public partial class HomePage : Window
             // Generate session code
             var sessionCode = _sessionService.CreateNewSession();
 
-            // TODO: Call n8n API to create session
-            // var success = await _apiService.CreateSession(sessionCode);
-            
-            // For now, simulate API call success
-            await Task.Delay(1000); // Simulate network delay
-            var success = true;
+            // Call n8n API to create session
+            var success = await _apiService.CreateSession(sessionCode);
 
             if (success)
             {
@@ -54,9 +51,11 @@ public partial class HomePage : Window
             }
             else
             {
-                // Show error message
+                // Show error message with more details
                 MessageBox.Show(
-                    "Failed to create session. Please check your internet connection and try again.",
+                    $"Failed to create session with code: {sessionCode}\n\n" +
+                    "Please check your internet connection and try again.\n\n" +
+                    "If the problem persists, please check the Debug output for more details.",
                     "Session Creation Failed",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);

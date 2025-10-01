@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace AITeacherAssistant.Services;
@@ -17,8 +18,8 @@ public class ApiService
     public ApiService()
     {
         _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri(BaseUrl);
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "AITeacherAssistant/1.0");
         
         // Set timeout
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
@@ -33,59 +34,93 @@ public class ApiService
     {
         try
         {
+            // Match the working API format: {"code":"FLOWA"}
             var payload = new
             {
-                code = code,
-                type = "session_create",
-                timestamp = DateTime.UtcNow
+                code = code
             };
 
             var json = JsonSerializer.Serialize(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/sessions/create", content);
+            var fullUrl = $"{BaseUrl}/sessions/create";
+            System.Diagnostics.Debug.WriteLine($"Sending payload: {json}");
+            System.Diagnostics.Debug.WriteLine($"API URL: {fullUrl}");
+            System.Diagnostics.Debug.WriteLine($"HttpClient configured: {_httpClient != null}");
+            System.Diagnostics.Debug.WriteLine($"HttpClient BaseAddress: {_httpClient.BaseAddress?.ToString() ?? "null"}");
+
+            var response = await _httpClient.PostAsync(fullUrl, content);
             
-            return response.IsSuccessStatusCode;
-        }
-        catch (HttpRequestException)
-        {
-            // Network error
+            // Read the response content for debugging
+            var responseContent = await response.Content.ReadAsStringAsync();
+            System.Diagnostics.Debug.WriteLine($"API Response Status: {response.StatusCode}");
+            System.Diagnostics.Debug.WriteLine($"API Response Content: {responseContent}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                // Check if response contains success indicator
+                var success = responseContent.Contains("\"success\":true");
+                System.Diagnostics.Debug.WriteLine($"Success check result: {success}");
+                return success;
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"API call failed with status: {response.StatusCode}");
             return false;
         }
-        catch (TaskCanceledException)
+        catch (HttpRequestException ex)
         {
-            // Timeout error
+            // Network error - log for debugging
+            System.Diagnostics.Debug.WriteLine($"HttpRequestException: {ex.Message}");
             return false;
         }
-        catch (Exception)
+        catch (TaskCanceledException ex)
         {
-            // Other errors
+            // Timeout error - log for debugging
+            System.Diagnostics.Debug.WriteLine($"TaskCanceledException: {ex.Message}");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // Other errors - log for debugging
+            System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
             return false;
         }
     }
 
     /// <summary>
-    /// Get the status of a session
+    /// Get current session status
     /// </summary>
-    /// <param name="code">5-letter session code</param>
-    /// <returns>Session status information</returns>
-    public async Task<SessionStatus?> GetSessionStatus(string code)
+    public async Task<SessionStatusResponse> GetSessionStatus(string code)
     {
         try
         {
-            var response = await _httpClient.GetAsync($"/sessions/{code}/status");
+            var response = await _httpClient.GetAsync(
+                $"{BaseUrl}/sessions/status?code={code}");
             
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var json = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<SessionStatus>(json);
+                return new SessionStatusResponse
+                {
+                    Success = false,
+                    Error = $"HTTP {response.StatusCode}"
+                };
             }
             
-            return null;
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<SessionStatusResponse>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            
+            return result ?? new SessionStatusResponse { Success = false };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return null;
+            return new SessionStatusResponse
+            {
+                Success = false,
+                Error = ex.Message
+            };
         }
     }
 
@@ -126,13 +161,43 @@ public class ApiService
 }
 
 /// <summary>
-/// Represents the status of a session
+/// Response model for session status API calls
 /// </summary>
-public class SessionStatus
+public class SessionStatusResponse
 {
-    public string Code { get; set; } = string.Empty;
-    public bool IsConnected { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? ConnectedAt { get; set; }
-    public string? UserId { get; set; }
+    [JsonPropertyName("success")]
+    public bool Success { get; set; }
+    
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+    
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+    
+    [JsonPropertyName("sessionId")]
+    public string? SessionId { get; set; }
+    
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+    
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+    
+    [JsonPropertyName("webapp")]
+    public WebappInfo? Webapp { get; set; }
+}
+
+/// <summary>
+/// Information about webapp connection
+/// </summary>
+public class WebappInfo
+{
+    [JsonPropertyName("connected")]
+    public bool Connected { get; set; }
+    
+    [JsonPropertyName("deviceType")]
+    public string? DeviceType { get; set; }
+    
+    [JsonPropertyName("lastPollAt")]
+    public string? LastPollAt { get; set; }
 }

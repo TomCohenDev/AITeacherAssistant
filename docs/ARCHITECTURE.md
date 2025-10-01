@@ -104,23 +104,36 @@ AITeacherAssistant/
 **Namespace**: `AITeacherAssistant.Views`
 
 **Key Responsibilities**:
+
 - Display modern, attractive UI for user connection
 - Generate and display QR codes for mobile scanning
 - Show 5-letter session codes for manual entry
+- **Poll API for connection status every 2.5 seconds**
+- **Handle 5-minute timeout with retry functionality**
 - Manage connection status and user feedback
 - Handle transition to MainWindow after connection
 
 **Key Properties**:
+
 - `Height="900" Width="650"`: Optimized window size
-- `ResizeMode="NoResize"`: Fixed window size
+- `ResizeMode="CanResize"`: Allow window resizing
 - `WindowStartupLocation="CenterScreen"`: Centered on screen
 - `Background="#F5F7FA"`: Light background color
+- `_pollingTimer`: DispatcherTimer for API polling
+- `_isPolling`: Boolean tracking polling state
+- `POLLING_INTERVAL_MS = 2500`: 2.5-second polling interval
+- `TIMEOUT_SECONDS = 300`: 5-minute timeout
 
 **Key Methods**:
-- `StartupWindow_Loaded()`: Initialize session and generate QR code
+
+- `StartupWindow_Loaded()`: Initialize session, generate QR code, and start polling
+- `StartPolling()`: Begin polling timer for connection status
+- `StopPolling()`: Stop polling timer and cleanup
+- `CheckConnectionStatus()`: Call API to check if user has connected
+- `HandleTimeout()`: Handle 5-minute timeout with retry UI
 - `OnUserConnected()`: Handle user connection event
 - `OnUserDisconnected()`: Handle user disconnection event
-- `TestConnectionButton_Click()`: Simulate connection for testing
+- `TestConnectionButton_Click()`: Simulate connection for testing or retry polling
 - `BeginSessionButton_Click()`: Launch MainWindow and close startup
 
 ### 3. SessionService (src/Services/SessionService.cs)
@@ -130,16 +143,19 @@ AITeacherAssistant/
 **Namespace**: `AITeacherAssistant.Services`
 
 **Key Responsibilities**:
+
 - Generate random 5-letter session codes (A-Z)
 - Track connection state (connected/disconnected)
 - Provide events for connection status changes
 - Generate JSON payload for QR codes
 
 **Key Properties**:
+
 - `CurrentSessionCode`: Current 5-letter session code
 - `IsUserConnected`: Boolean connection state
 
 **Key Methods**:
+
 - `GenerateSessionCode()`: Create random 5-letter code
 - `CreateNewSession()`: Generate new session and return code
 - `MarkUserConnected()`: Set user as connected
@@ -147,19 +163,51 @@ AITeacherAssistant/
 - `SimulateUserConnection()`: Test connection simulation
 - `GetQRCodePayload()`: Generate JSON for QR code
 
-### 4. QRCodeService (src/Services/QRCodeService.cs)
+### 4. ApiService (src/Services/ApiService.cs)
+
+**Purpose**: Handles all communication with the n8n backend API.
+
+**Namespace**: `AITeacherAssistant.Services`
+
+**Key Responsibilities**:
+
+- Create sessions via POST /sessions/create endpoint
+- Check session status via GET /sessions/status endpoint
+- Handle HTTP requests with proper error handling
+- Serialize/deserialize JSON data
+- Manage HTTP client lifecycle
+
+**Key Properties**:
+
+- `BaseUrl`: n8n webhook API base URL
+- `_httpClient`: HTTP client for API communication
+
+**Key Methods**:
+
+- `CreateSession(code)`: Create new session with 5-letter code
+- `GetSessionStatus(code)`: Check if webapp has connected to session
+- `ConnectToSession(code, userInfo)`: Connect user to existing session (future)
+
+**Response Models**:
+
+- `SessionStatusResponse`: API response for session status checks
+- `WebappInfo`: Information about webapp connection status
+
+### 5. QRCodeService (src/Services/QRCodeService.cs)
 
 **Purpose**: Generates QR codes using QRCoder library.
 
 **Namespace**: `AITeacherAssistant.Services`
 
 **Key Responsibilities**:
+
 - Generate QR codes from text data
 - Convert System.Drawing.Bitmap to WPF BitmapImage
 - Handle QR code sizing and formatting
 - Generate session-specific QR codes
 
 **Key Methods**:
+
 - `GenerateQRCode(string data, int size)`: Generate QR code from text
 - `GenerateSessionQRCode(string sessionCode, int size)`: Generate session QR code
 - `ConvertToBitmapImage(Bitmap bitmap)`: Convert to WPF-compatible image
@@ -249,6 +297,7 @@ WPF transparency is achieved through:
 ## Application Flow
 
 ### Startup to Overlay Flow
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                Application Start                    │
@@ -293,6 +342,7 @@ WPF transparency is achieved through:
 ## Component Interaction Flow
 
 ### Service Layer Interactions
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                StartupWindow                        │
@@ -378,6 +428,46 @@ WPF transparency is achieved through:
 - Authentication service
 - Real-time communication (SignalR consideration)
 - DTO models for API requests/responses
+
+---
+
+## Session Status Polling Mechanism
+
+The StartupWindow implements a robust polling system to monitor webapp connections in real-time.
+
+### Polling Configuration
+
+- **Poll Interval**: 2.5 seconds (2500ms)
+- **Timeout**: 5 minutes (300 seconds)
+- **Endpoint**: `GET /sessions/status?code={CODE}`
+- **Timer Type**: `DispatcherTimer` (UI thread)
+
+### Polling State Machine
+
+```
+StartupWindow Loaded
+        ↓
+Start Polling (every 2.5s)
+        ↓
+Check Status via API
+        ├─ webapp.connected = false → Continue polling
+        ├─ webapp.connected = true → Stop polling, show "User Connected"
+        └─ 5 minutes elapsed → Stop polling, show timeout error
+```
+
+### Error Handling
+
+- **Network Errors**: Continue polling (transient errors)
+- **API Errors**: Log error, continue polling
+- **Timeout**: Show retry UI with user notification
+- **Window Close**: Stop polling and cleanup resources
+
+### UI Feedback
+
+- **Polling Active**: Orange status dot, "Waiting for connection..."
+- **User Connected**: Green status dot, "✓ User Connected"
+- **Timeout**: Orange status dot, "⏱️ Connection Timeout"
+- **Retry Button**: "🔄 Retry Polling" after timeout
 
 ---
 

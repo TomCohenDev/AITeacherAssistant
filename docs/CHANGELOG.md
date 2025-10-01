@@ -4,10 +4,108 @@ All notable changes to the AI Teacher Assistant project will be documented in th
 
 ---
 
+## [Date: 2025-01-27 - Session Status Polling Implementation]
+
+### Added
+
+- **Session Status Polling**: Real-time connection monitoring in StartupWindow
+
+  - Automatic polling every 2.5 seconds to check webapp connection status
+  - 5-minute timeout with user-friendly error messages
+  - Retry functionality for failed connection attempts
+  - Visual feedback with status indicators and button states
+
+- **Enhanced API Service**: Extended API communication capabilities
+
+  - New `GetSessionStatus()` method for checking connection status
+  - `SessionStatusResponse` and `WebappInfo` models for API responses
+  - Proper JSON deserialization with case-insensitive property mapping
+  - Enhanced error handling for network issues
+
+- **Improved User Experience**: Better connection flow management
+  - Test Connection button for development and testing
+  - Retry Polling button after timeout
+  - Automatic UI updates when connection status changes
+  - Proper cleanup of polling timers on window close
+
+### Changed
+
+- **StartupWindow Behavior**: Enhanced connection detection
+
+  - Polling starts automatically when window loads
+  - Real-time status updates via API calls
+  - Better integration with SessionService events
+  - Improved error handling and user feedback
+
+- **API Integration**: Enhanced session status checking
+  - Updated endpoint format: `GET /sessions/status?code={CODE}`
+  - Better response parsing with proper error handling
+  - Case-insensitive JSON property mapping
+
+### Files Modified
+
+- `src/Views/StartupWindow.xaml.cs` - Added polling logic and timer management
+- `src/Views/StartupWindow.xaml` - Added Test Connection button
+- `src/Services/ApiService.cs` - Added session status API method and models
+- `docs/CHANGELOG.md` - Updated with polling feature documentation
+
+---
+
+## [Date: 2025-10-01 18:00 - Home/Welcome Page Implementation]
+
+### Added
+
+- **Home/Welcome Page**: Complete welcome screen with modern UI design
+
+  - Professional card-based layout with gradient backgrounds
+  - Three main sections: Quick Start, Documentation, Support & Community
+  - Modern button styles with hover effects and shadows
+  - Responsive design with proper spacing and typography
+  - External link integration for documentation and support
+
+- **API Service Integration**: Complete n8n backend communication
+
+  - HttpClient-based API service with proper error handling
+  - Session creation endpoint integration
+  - Session status checking functionality
+  - Async/await pattern with timeout handling
+  - JSON serialization for API payloads
+
+- **Enhanced Application Flow**: Improved startup experience
+  - HomePage as new application entry point
+  - Seamless transition from HomePage to StartupWindow
+  - Session code generation and API integration
+  - Loading states and error handling
+
+### Changed
+
+- **Application Startup**: Updated to start with HomePage instead of StartupWindow
+
+  - App.xaml StartupUri changed to src/Views/HomePage.xaml
+  - StartupWindow now accepts sessionCode parameter
+  - Removed session generation from StartupWindow (now handled in HomePage)
+
+- **Session Management**: Enhanced session creation flow
+  - Session code generated in HomePage before API call
+  - API integration for session creation
+  - Better error handling and user feedback
+
+### Files Modified
+
+- `src/Views/HomePage.xaml` (created - modern welcome page UI)
+- `src/Views/HomePage.xaml.cs` (created - page logic and API integration)
+- `src/Services/ApiService.cs` (created - n8n API communication)
+- `src/Views/StartupWindow.xaml.cs` (updated - accept sessionCode parameter)
+- `App.xaml` (updated - new startup page)
+
+---
+
 ## [Date: 2025-10-01 17:00 - Startup Window with QR Code Implementation]
 
 ### Added
+
 - **Startup Window with QR Code**: Complete startup flow for user connection
+
   - Modern, attractive UI with gradient background and card layout
   - QR code generation using QRCoder library (300x300px)
   - 5-letter session code display with monospace formatting
@@ -17,6 +115,7 @@ All notable changes to the AI Teacher Assistant project will be documented in th
   - Invisible scrolling with hidden scrollbar
 
 - **Session Management Service**: Complete session handling system
+
   - Random 5-letter code generation (A-Z only)
   - Session state management (connected/disconnected)
   - Event-driven architecture for connection status
@@ -24,6 +123,7 @@ All notable changes to the AI Teacher Assistant project will be documented in th
   - Test simulation functionality
 
 - **QR Code Generation Service**: Professional QR code creation
+
   - QRCoder NuGet package integration
   - BitmapImage conversion for WPF display
   - Configurable QR code size
@@ -38,7 +138,9 @@ All notable changes to the AI Teacher Assistant project will be documented in th
   - Seamless transition to MainWindow overlay
 
 ### Changed
+
 - **Application Startup**: Changed from MainWindow to StartupWindow
+
   - App.xaml StartupUri updated to src/Views/StartupWindow.xaml
   - MainWindow now launched from StartupWindow after connection
 
@@ -48,12 +150,14 @@ All notable changes to the AI Teacher Assistant project will be documented in th
   - Invisible scrolling for content overflow
 
 ### Fixed
+
 - **Content Visibility**: Resolved content cutoff issues
   - Increased window height to accommodate all content
   - Added invisible scrolling as backup
   - Optimized margins and spacing
 
 ### Files Modified
+
 - `src/Views/StartupWindow.xaml` (created - modern UI design)
 - `src/Views/StartupWindow.xaml.cs` (created - logic and event handlers)
 - `src/Services/SessionService.cs` (created - session management)

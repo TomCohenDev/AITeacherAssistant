@@ -1,5 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using AITeacherAssistant.Services;
 
 namespace AITeacherAssistant.Views;
@@ -11,7 +13,14 @@ public partial class StartupWindow : Window
 {
     private readonly SessionService _sessionService;
     private readonly QRCodeService _qrCodeService;
+    private readonly ApiService _apiService;
     private readonly string _sessionCode;
+    
+    // Polling fields
+    private DispatcherTimer? _pollingTimer;
+    private DateTime _pollingStartTime;
+    private const int POLLING_INTERVAL_MS = 2500; // 2.5 seconds
+    private const int TIMEOUT_SECONDS = 300; // 5 minutes
     
     public StartupWindow(string sessionCode)
     {
@@ -22,6 +31,7 @@ public partial class StartupWindow : Window
         // Initialize services
         _sessionService = new SessionService();
         _qrCodeService = new QRCodeService();
+        _apiService = new ApiService();
         
         // Subscribe to session events
         _sessionService.UserConnected += OnUserConnected;
@@ -54,8 +64,8 @@ public partial class StartupWindow : Window
                           MessageBoxButton.OK, MessageBoxImage.Error);
         }
         
-        // TODO: Start polling n8n backend for connection status
-        // StartConnectionPolling();
+        // Start polling for connection
+        StartPolling();
     }
     
     /// <summary>
@@ -72,7 +82,8 @@ public partial class StartupWindow : Window
             StatusText.Foreground = new System.Windows.Media.SolidColorBrush(
                 System.Windows.Media.Colors.Green);
             
-            // Show begin session button
+            // Hide back to menu button and show begin session button
+            BackToMenuButton.Visibility = Visibility.Collapsed;
             BeginSessionButton.Visibility = Visibility.Visible;
         });
     }
@@ -91,11 +102,36 @@ public partial class StartupWindow : Window
             StatusText.Foreground = new System.Windows.Media.SolidColorBrush(
                 System.Windows.Media.Colors.Gray);
             
-            // Hide begin session button
+            // Hide begin session button and show back to menu button
             BeginSessionButton.Visibility = Visibility.Collapsed;
+            BackToMenuButton.Visibility = Visibility.Visible;
         });
     }
     
+    
+    /// <summary>
+    /// Back to menu button click handler
+    /// </summary>
+    private void BackToMenuButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // Stop polling if active
+            StopPolling();
+            
+            // Create and show the home page
+            var homePage = new HomePage();
+            homePage.Show();
+            
+            // Close this startup window
+            this.Close();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error returning to menu: {ex.Message}", "Error", 
+                          MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
     
     /// <summary>
     /// Begin session button click handler
@@ -119,40 +155,106 @@ public partial class StartupWindow : Window
     }
     
     /// <summary>
-    /// Start polling the n8n backend for connection status
-    /// TODO: Implement actual API polling
+    /// Start polling for session connection status
     /// </summary>
-    private void StartConnectionPolling()
+    private void StartPolling()
     {
-        // TODO: Replace with actual n8n API polling
-        // This would check if a user has connected using the session code
-        // and call _sessionService.MarkUserConnected() when they do
+        _pollingStartTime = DateTime.UtcNow;
         
-        // Example implementation:
-        // var timer = new DispatcherTimer();
-        // timer.Interval = TimeSpan.FromSeconds(2);
-        // timer.Tick += async (s, e) => {
-        //     var isConnected = await CheckBackendConnectionStatus();
-        //     if (isConnected && !_sessionService.IsUserConnected) {
-        //         _sessionService.MarkUserConnected();
-        //     }
-        // };
-        // timer.Start();
+        _pollingTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(POLLING_INTERVAL_MS)
+        };
+        _pollingTimer.Tick += PollingTimer_Tick;
+        _pollingTimer.Start();
+        
+        // Do first check immediately
+        _ = CheckConnectionStatus();
     }
     
     /// <summary>
-    /// Check if user has connected via backend API
-    /// TODO: Implement actual API call to n8n
+    /// Stop polling timer
     /// </summary>
-    /// <returns>True if user is connected, false otherwise</returns>
-    private async Task<bool> CheckBackendConnectionStatus()
+    private void StopPolling()
     {
-        // TODO: Implement actual API call to n8n backend
-        // This would check if the current session code has been used
-        // to establish a connection from the phone webapp
         
-        await Task.Delay(100); // Placeholder for async operation
-        return false; // Placeholder return value
+        if (_pollingTimer != null)
+        {
+            _pollingTimer.Stop();
+            _pollingTimer.Tick -= PollingTimer_Tick;
+            _pollingTimer = null;
+        }
+    }
+    
+    /// <summary>
+    /// Polling timer tick event
+    /// </summary>
+    private async void PollingTimer_Tick(object? sender, EventArgs e)
+    {
+        await CheckConnectionStatus();
+    }
+    
+    /// <summary>
+    /// Check if user has connected via webapp
+    /// </summary>
+    private async Task CheckConnectionStatus()
+    {
+        try
+        {
+            // Check timeout
+            var elapsedTime = DateTime.UtcNow - _pollingStartTime;
+            if (elapsedTime.TotalSeconds > TIMEOUT_SECONDS)
+            {
+                StopPolling();
+                HandleTimeout();
+                return;
+            }
+            
+            // Call API to check status
+            var response = await _apiService.GetSessionStatus(_sessionCode);
+            
+            if (response.Success && response.Webapp?.Connected == true)
+            {
+                // User connected!
+                StopPolling();
+                OnUserConnected(this, EventArgs.Empty);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but continue polling
+            System.Diagnostics.Debug.WriteLine($"Polling error: {ex.Message}");
+            // Don't stop polling on transient errors
+        }
+    }
+    
+    /// <summary>
+    /// Handle connection timeout (5 minutes elapsed)
+    /// </summary>
+    private void HandleTimeout()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            // Update UI to show timeout
+            StatusText.Text = "⏱️ Connection Timeout";
+            StatusText.Foreground = new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Colors.Orange);
+            StatusDot.Fill = new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Colors.Orange);
+            
+            // Show back to menu button
+            BackToMenuButton.Visibility = Visibility.Visible;
+            
+            // Show message and return to menu after OK is clicked
+            MessageBox.Show(
+                "No user connected within 5 minutes.",
+                "Connection Timeout",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            
+            // Return to menu after user clicks OK
+            BackToMenuButton_Click(this, new RoutedEventArgs());
+        });
     }
     
     /// <summary>
@@ -160,9 +262,15 @@ public partial class StartupWindow : Window
     /// </summary>
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
+        // Stop polling if active
+        StopPolling();
+        
         // Unsubscribe from events
         _sessionService.UserConnected -= OnUserConnected;
         _sessionService.UserDisconnected -= OnUserDisconnected;
+        
+        // Dispose API service
+        _apiService?.Dispose();
         
         base.OnClosing(e);
     }
