@@ -6,11 +6,13 @@
         xmlns:local="clr-namespace:AITeacherAssistant.Views"
         mc:Ignorable="d"
         Title="AI Teacher Assistant - Connect"
+        MinHeight="500" MinWidth="500"
         Height="900" Width="650"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="True"
-        Background="#F5F7FA">
+        Background="#F5F7FA"
+        SizeToContent="WidthAndHeight">
     
     <Window.Resources>
         <!-- Modern Button Style -->
@@ -69,30 +71,6 @@
             </Setter>
         </Style>
         
-        <!-- Test Button Style -->
-        <Style x:Key="TestButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
-            <Setter Property="Background" Value="#ed8936"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="8" 
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                            VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#dd6b20"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#c05621"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
     
     <Grid>
@@ -109,7 +87,7 @@
         <!-- Main Content Container -->
         <Border Background="White" 
                 CornerRadius="20" 
-                Margin="25">
+                Margin="20">
             <Border.Effect>
                 <DropShadowEffect Color="Black" 
                                 Opacity="0.1" 
@@ -117,10 +95,11 @@
                                 ShadowDepth="0"/>
             </Border.Effect>
             
-            <ScrollViewer VerticalScrollBarVisibility="Hidden" 
+            <ScrollViewer VerticalScrollBarVisibility="Auto" 
                         HorizontalScrollBarVisibility="Disabled"
-                        Margin="25">
-                <StackPanel>
+                        Padding="20">
+                <Viewbox Stretch="Uniform" MaxWidth="800" MaxHeight="600">
+                    <StackPanel MinWidth="500">
                     
                     <!-- Header Section -->
                     <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
@@ -212,12 +191,6 @@
                                      VerticalAlignment="Center"/>
                         </StackPanel>
                         
-                        <!-- Test Connection Button (for development) -->
-                        <Button x:Name="TestConnectionButton" 
-                              Content="Simulate Connection (Test)" 
-                              Style="{StaticResource TestButton}" 
-                              Click="TestConnectionButton_Click"
-                              HorizontalAlignment="Center"/>
                         
                         <!-- Begin Session Button (shown after connection) -->
                         <Button x:Name="BeginSessionButton" 
@@ -241,7 +214,8 @@
                                  HorizontalAlignment="Center"/>
                     </StackPanel>
                     
-                </StackPanel>
+                    </StackPanel>
+                </Viewbox>
             </ScrollViewer>
         </Border>
     </Grid>

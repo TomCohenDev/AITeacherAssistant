@@ -11,10 +11,13 @@ public partial class StartupWindow : Window
 {
     private readonly SessionService _sessionService;
     private readonly QRCodeService _qrCodeService;
+    private readonly string _sessionCode;
     
-    public StartupWindow()
+    public StartupWindow(string sessionCode)
     {
         InitializeComponent();
+        
+        _sessionCode = sessionCode;
         
         // Initialize services
         _sessionService = new SessionService();
@@ -29,20 +32,20 @@ public partial class StartupWindow : Window
     }
     
     /// <summary>
-    /// Window loaded event - generate session and QR code
+    /// Window loaded event - display session code and QR code
     /// </summary>
     private void StartupWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        // Generate new session
-        var sessionCode = _sessionService.CreateNewSession();
+        // Use the passed session code
+        _sessionService.CurrentSessionCode = _sessionCode;
         
         // Update UI with session code (formatted with spaces)
-        SessionCodeText.Text = string.Join(" ", sessionCode.ToCharArray());
+        SessionCodeText.Text = string.Join(" ", _sessionCode.ToCharArray());
         
         // Generate and display QR code
         try
         {
-            var qrCodeImage = _qrCodeService.GenerateSessionQRCode(sessionCode, 300);
+            var qrCodeImage = _qrCodeService.GenerateSessionQRCode(_sessionCode, 300);
             QRCodeImage.Source = qrCodeImage;
         }
         catch (Exception ex)
@@ -71,7 +74,6 @@ public partial class StartupWindow : Window
             
             // Show begin session button
             BeginSessionButton.Visibility = Visibility.Visible;
-            TestConnectionButton.Visibility = Visibility.Collapsed;
         });
     }
     
@@ -91,18 +93,9 @@ public partial class StartupWindow : Window
             
             // Hide begin session button
             BeginSessionButton.Visibility = Visibility.Collapsed;
-            TestConnectionButton.Visibility = Visibility.Visible;
         });
     }
     
-    /// <summary>
-    /// Test connection button click handler
-    /// </summary>
-    private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
-    {
-        // Simulate user connection for testing
-        _sessionService.SimulateUserConnection();
-    }
     
     /// <summary>
     /// Begin session button click handler

@@ -1,0 +1,399 @@
+<Window x:Class="AITeacherAssistant.Views.HomePage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AITeacherAssistant.Views"
+        mc:Ignorable="d"
+        Title="AI Teacher Assistant - Welcome"
+        MinHeight="600" MinWidth="700"
+        Height="900" Width="800"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="True"
+        Background="#F5F7FA"
+        SizeToContent="WidthAndHeight">
+    
+    <Window.Resources>
+        <!-- Modern Button Styles -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#48bb78" Offset="0"/>
+                        <GradientStop Color="#38a169" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="30,15"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="12" 
+                                Padding="{TemplateBinding Padding}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#48bb78" 
+                                                Opacity="0.3" 
+                                                BlurRadius="8" 
+                                                ShadowDepth="0"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#38a169" Offset="0"/>
+                                            <GradientStop Color="#2f855a" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#2f855a" Offset="0"/>
+                                            <GradientStop Color="#276749" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#a0aec0"/>
+                                <Setter Property="Foreground" Value="#718096"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#667eea" Offset="0"/>
+                        <GradientStop Color="#5a67d8" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="8" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#5a67d8" Offset="0"/>
+                                            <GradientStop Color="#4c51bf" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#4c51bf" Offset="0"/>
+                                            <GradientStop Color="#434190" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="SupportButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#ed8936" Offset="0"/>
+                        <GradientStop Color="#dd6b20" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="8" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#dd6b20" Offset="0"/>
+                                            <GradientStop Color="#c05621" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#c05621" Offset="0"/>
+                                            <GradientStop Color="#9c4221" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <!-- Background Gradient -->
+        <Rectangle>
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#667eea" Offset="0"/>
+                    <GradientStop Color="#764ba2" Offset="1"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+        
+        <!-- Main Content Container -->
+        <Border Background="White" 
+                CornerRadius="20" 
+                Margin="20">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" 
+                                Opacity="0.1" 
+                                BlurRadius="20" 
+                                ShadowDepth="0"/>
+            </Border.Effect>
+            
+            <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                        HorizontalScrollBarVisibility="Disabled"
+                        Padding="20">
+                <Viewbox Stretch="Uniform" MaxWidth="1200" MaxHeight="800">
+                    <StackPanel Margin="40" MinWidth="700">
+                    
+                    <!-- Header Section -->
+                    <StackPanel HorizontalAlignment="Center" Margin="0,0,0,40">
+                        <!-- App Logo/Icon -->
+                        <Ellipse Width="100" Height="100" 
+                               Fill="#667eea" 
+                               Margin="0,0,0,20">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#667eea" 
+                                                Opacity="0.3" 
+                                                BlurRadius="15" 
+                                                ShadowDepth="0"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        
+                        <!-- App Title -->
+                        <TextBlock Text="AI Teacher Assistant" 
+                                 FontSize="36" 
+                                 FontWeight="Bold" 
+                                 Foreground="#2d3748" 
+                                 HorizontalAlignment="Center"/>
+                        
+                        <!-- Subtitle -->
+                        <TextBlock Text="Transform your teaching with AI-powered assistance" 
+                                 FontSize="18" 
+                                 Foreground="#718096" 
+                                 HorizontalAlignment="Center"
+                                 TextWrapping="Wrap"
+                                 TextAlignment="Center"
+                                 MaxWidth="500"
+                                 Margin="0,10,0,0"/>
+                    </StackPanel>
+                    
+                    <!-- Main Content Cards -->
+                    <Grid Margin="0,0,0,30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Card 1: Quick Start -->
+                        <Border Grid.Column="0" 
+                                Background="#F7FAFC" 
+                                CornerRadius="16" 
+                                Padding="25">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" 
+                                                Opacity="0.05" 
+                                                BlurRadius="10" 
+                                                ShadowDepth="0"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <!-- Card Icon -->
+                                <Ellipse Width="60" Height="60" 
+                                       Fill="#48bb78" 
+                                       Margin="0,0,0,15"/>
+                                
+                                <!-- Card Heading -->
+                                <TextBlock Text="Get Started" 
+                                         FontSize="20" 
+                                         FontWeight="Bold" 
+                                         Foreground="#2d3748" 
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,10"/>
+                                
+                                <!-- Card Description -->
+                                <TextBlock Text="Click 'Start New Session' to begin teaching with AI assistance" 
+                                         FontSize="14" 
+                                         Foreground="#4a5568" 
+                                         HorizontalAlignment="Center"
+                                         TextWrapping="Wrap"
+                                         TextAlignment="Center"
+                                         Margin="0,0,0,20"/>
+                                
+                                <!-- Primary Action Button -->
+                                <Button x:Name="StartSessionButton" 
+                                      Content="Start New Session" 
+                                      Style="{StaticResource PrimaryButton}"
+                                      Click="StartSessionButton_Click"
+                                      HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Card 2: Documentation -->
+                        <Border Grid.Column="2" 
+                                Background="#F7FAFC" 
+                                CornerRadius="16" 
+                                Padding="25">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" 
+                                                Opacity="0.05" 
+                                                BlurRadius="10" 
+                                                ShadowDepth="0"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <!-- Card Icon -->
+                                <Ellipse Width="60" Height="60" 
+                                       Fill="#667eea" 
+                                       Margin="0,0,0,15"/>
+                                
+                                <!-- Card Heading -->
+                                <TextBlock Text="Learn More" 
+                                         FontSize="20" 
+                                         FontWeight="Bold" 
+                                         Foreground="#2d3748" 
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,15"/>
+                                
+                                <!-- Documentation Links -->
+                                <StackPanel>
+                                    <Button Content="📖 User Guide" 
+                                          Style="{StaticResource SecondaryButton}"
+                                          Click="OpenUserGuide_Click"
+                                          HorizontalAlignment="Center"
+                                          Margin="0,0,0,10"/>
+                                    
+                                    <Button Content="🎥 Tutorial Videos" 
+                                          Style="{StaticResource SecondaryButton}"
+                                          Click="OpenTutorials_Click"
+                                          HorizontalAlignment="Center"
+                                          Margin="0,0,0,10"/>
+                                    
+                                    <Button Content="❓ FAQ" 
+                                          Style="{StaticResource SecondaryButton}"
+                                          Click="OpenFAQ_Click"
+                                          HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Card 3: Support & Community -->
+                        <Border Grid.Column="4" 
+                                Background="#F7FAFC" 
+                                CornerRadius="16" 
+                                Padding="25">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" 
+                                                Opacity="0.05" 
+                                                BlurRadius="10" 
+                                                ShadowDepth="0"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <!-- Card Icon -->
+                                <Ellipse Width="60" Height="60" 
+                                       Fill="#ed8936" 
+                                       Margin="0,0,0,15"/>
+                                
+                                <!-- Card Heading -->
+                                <TextBlock Text="Need Help?" 
+                                         FontSize="20" 
+                                         FontWeight="Bold" 
+                                         Foreground="#2d3748" 
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,15"/>
+                                
+                                <!-- Support Links -->
+                                <StackPanel>
+                                    <Button Content="🐛 Report Issue" 
+                                          Style="{StaticResource SupportButton}"
+                                          Click="ReportIssue_Click"
+                                          HorizontalAlignment="Center"
+                                          Margin="0,0,0,10"/>
+                                    
+                                    <Button Content="💬 Discord Community" 
+                                          Style="{StaticResource SupportButton}"
+                                          Click="OpenDiscord_Click"
+                                          HorizontalAlignment="Center"
+                                          Margin="0,0,0,10"/>
+                                    
+                                    <Button Content="✉️ Contact Support" 
+                                          Style="{StaticResource SupportButton}"
+                                          Click="ContactSupport_Click"
+                                          HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- Footer -->
+                    <StackPanel HorizontalAlignment="Center" Margin="0,20,0,0">
+                        <TextBlock Text="Version 0.1.0-alpha" 
+                                 FontSize="12" 
+                                 Foreground="#a0aec0" 
+                                 HorizontalAlignment="Center"/>
+                        <TextBlock Text="© 2025 AI Teacher Assistant. All rights reserved." 
+                                 FontSize="12" 
+                                 Foreground="#a0aec0" 
+                                 HorizontalAlignment="Center"
+                                 Margin="0,5,0,0"/>
+                    </StackPanel>
+                    
+                    </StackPanel>
+                </Viewbox>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>

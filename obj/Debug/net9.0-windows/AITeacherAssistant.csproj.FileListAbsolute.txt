@@ -24,3 +24,5 @@ C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\
 C:\Users\tomco\github\ita\AITeacherAssistant\bin\Debug\net9.0-windows\QRCoder.dll
 C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\StartupWindow.baml
 C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\AITeache.4E7A0158.Up2Date
+C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\HomePage.g.cs
+C:\Users\tomco\github\ita\AITeacherAssistant\obj\Debug\net9.0-windows\src\Views\HomePage.baml

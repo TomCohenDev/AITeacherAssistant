@@ -14,7 +14,7 @@ public class SessionService
     /// <summary>
     /// Current session code (5-letter uppercase string)
     /// </summary>
-    public string CurrentSessionCode { get; private set; } = string.Empty;
+    public string CurrentSessionCode { get; set; } = string.Empty;
     
     /// <summary>
     /// Whether a user is currently connected to this session
@@ -82,13 +82,6 @@ public class SessionService
         }
     }
     
-    /// <summary>
-    /// Simulate user connection for testing purposes
-    /// </summary>
-    public void SimulateUserConnection()
-    {
-        MarkUserConnected();
-    }
     
     /// <summary>
     /// Get the JSON payload for QR code generation
