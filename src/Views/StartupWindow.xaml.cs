@@ -16,6 +16,7 @@ public partial class StartupWindow : Window
     private readonly QRCodeService _qrCodeService;
     private readonly ApiService _apiService;
     private readonly string _sessionCode;
+    private string _sessionId = "";
     
     // Polling fields
     private DispatcherTimer? _pollingTimer;
@@ -147,8 +148,8 @@ public partial class StartupWindow : Window
     {
         try
         {
-            // Create and show the main overlay window
-            var mainWindow = new MainWindow();
+            // Create and show the main overlay window with session info
+            var mainWindow = new MainWindow(_sessionCode, _sessionId);
             mainWindow.Show();
             
             // Close this startup window
@@ -246,11 +247,21 @@ public partial class StartupWindow : Window
             // Call API to check status
             var response = await _apiService.GetSessionStatus(_sessionCode);
             
-            if (response.Success && response.Webapp?.Connected == true)
+            if (response.Success)
             {
-                // User connected!
-                StopPolling();
-                OnUserConnected(this, EventArgs.Empty);
+                // Store session ID for later use
+                if (!string.IsNullOrEmpty(response.SessionId))
+                {
+                    _sessionId = response.SessionId;
+                }
+                
+                // Check if user connected
+                if (response.Webapp?.Connected == true)
+                {
+                    // User connected!
+                    StopPolling();
+                    OnUserConnected(this, EventArgs.Empty);
+                }
             }
         }
         catch (Exception ex)

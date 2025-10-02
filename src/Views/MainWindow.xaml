@@ -18,6 +18,11 @@
         <!-- Transparent overlay container -->
         <Grid x:Name="OverlayGrid" Background="Transparent">
             
+            <!-- ANNOTATION CANVAS -->
+            <Canvas x:Name="AnnotationCanvas" 
+                    Background="Transparent"
+                    IsHitTestVisible="False"/>
+            
             <!-- Control Panel (Top-Right Corner) -->
             <Border x:Name="ControlPanel" 
                     HorizontalAlignment="Right" 
@@ -39,6 +44,16 @@
                                TextWrapping="Wrap"
                                MaxWidth="200"
                                Margin="0,0,0,10"/>
+                    
+                    <Button x:Name="TestAnnotationsButton" 
+                            Content="Test Annotations" 
+                            Click="TestButton_Click"
+                            Background="#CC2E2E2E"
+                            Foreground="White"
+                            BorderBrush="Gray"
+                            Padding="8,4"
+                            Cursor="Hand"
+                            Margin="0,0,0,5"/>
                     
                     <Button x:Name="CloseButton" 
                             Content="Close" 

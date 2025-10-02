@@ -471,6 +471,104 @@ Check Status via API
 
 ---
 
+## Supabase Realtime Subscription System
+
+The application implements real-time AI message delivery using Supabase's WebSocket-based realtime functionality.
+
+### Realtime Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                Supabase Database                    │
+│  ┌───────────────────────────────────────────────┐ │
+│  │              messages table                   │ │
+│  │  - id (UUID)                                  │ │
+│  │  - session_id (UUID)                          │ │
+│  │  - role (text) - "assistant" or "user"       │ │
+│  │  - content (text) - message content           │ │
+│  │  - metadata (jsonb) - structured data         │ │
+│  │  - created_at (timestamp)                     │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      │ WebSocket Connection
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                SupabaseService                      │
+│  ┌───────────────────────────────────────────────┐ │
+│  │         Realtime Subscription                 │ │
+│  │  - Channel: "messages-{sessionId}"           │ │
+│  │  - Event: INSERT on messages table           │ │
+│  │  - Filter: session_id = current session      │ │
+│  │  - Filter: role = "assistant"                │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      │ Events
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                MainWindow                           │
+│  ┌───────────────────────────────────────────────┐ │
+│  │         Event Handlers                        │ │
+│  │  - OnAnnotationReceived()                     │ │
+│  │  - OnTextMessageReceived()                    │ │
+│  │  - OnSupabaseError()                          │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      │ UI Updates
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                Annotation Canvas                    │
+│  ┌───────────────────────────────────────────────┐ │
+│  │         Rendered Annotations                   │ │
+│  │  - Text blocks                                │ │
+│  │  - Arrows and shapes                          │ │
+│  │  - Freehand drawings                          │ │
+│  │  - Real-time updates                          │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+### Message Flow
+
+1. **AI Processing**: n8n processes user input and generates AI response
+2. **Database Insert**: AI response inserted into Supabase `messages` table
+3. **Realtime Trigger**: Supabase triggers WebSocket event for new message
+4. **Client Filtering**: SupabaseService filters by session_id and role
+5. **Event Dispatch**: Appropriate event handler called based on message type
+6. **UI Rendering**: AnnotationRenderer renders visual elements on canvas
+
+### Message Types
+
+- **`annotation`**: Pure annotation data (shapes, arrows, text)
+- **`text_response`**: Pure text response from AI
+- **`mixed`**: Both annotation and text content
+- **`text_with_image`**: Text response with uploaded image
+
+### Configuration
+
+- **Supabase URL**: `https://YOUR_PROJECT.supabase.co`
+- **Supabase Anon Key**: Public key for client authentication
+- **Auto-connect**: Enabled for automatic WebSocket connection
+- **Auto-refresh**: Enabled for token refresh
+
+### Error Handling
+
+- **Connection Failure**: Show warning dialog, continue without realtime
+- **Subscription Failure**: Log error, attempt reconnection
+- **Message Parse Error**: Log error, skip malformed message
+- **UI Thread Safety**: All UI updates dispatched to UI thread
+
+### Performance Considerations
+
+- **WebSocket Overhead**: Minimal, only active during session
+- **Client-side Filtering**: Reduces unnecessary message processing
+- **Event-driven**: No polling, immediate response to new messages
+- **Memory Management**: Proper cleanup on window close
+
+---
+
 ## Dependencies
 
 ### Current Dependencies
@@ -480,11 +578,18 @@ Check Status via API
 - **Win32 API**: Native Windows functionality via P/Invoke
 - **QRCoder 1.6.0**: QR code generation library
 - **System.Drawing.Common**: Required by QRCoder for bitmap operations
+- **supabase-csharp 0.16.2**: Main Supabase client library
+- **realtime-csharp 6.0.4**: Supabase realtime WebSocket functionality
+- **postgrest-csharp 3.5.1**: PostgreSQL REST API client
+- **gotrue-csharp 4.2.7**: Supabase authentication client
+- **supabase-storage-csharp 1.4.0**: Supabase storage client
+- **functions-csharp 1.3.2**: Supabase Edge Functions client
+- **Newtonsoft.Json 13.0.3**: JSON serialization (via Supabase dependencies)
+- **System.Reactive 5.0.0**: Reactive extensions (via Supabase dependencies)
+- **Websocket.Client 4.6.1**: WebSocket client (via Supabase dependencies)
 
 ### Planned Dependencies
 
-- **System.Net.Http**: For HTTP API calls
-- **Newtonsoft.Json** or **System.Text.Json**: JSON serialization
 - **Microsoft.Toolkit.Wpf**: Modern WPF controls (optional)
 
 ---

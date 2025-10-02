@@ -4,6 +4,89 @@ All notable changes to the AI Teacher Assistant project will be documented in th
 
 ---
 
+## [Date: 2025-10-02 - Supabase Realtime Integration]
+
+### Added
+
+- **Supabase Realtime Subscriptions**: Real-time AI message delivery system
+
+  - WebSocket-based realtime connection to Supabase
+  - Automatic listening for new messages in the `messages` table
+  - Client-side filtering by session_id and role (assistant only)
+  - Event-driven architecture for annotation and text message handling
+
+- **SupabaseService**: Complete realtime subscription management
+
+  - Initialize Supabase client with project URL and anon key
+  - Subscribe to session-specific message channels
+  - Handle INSERT events on messages table
+  - Parse message metadata and route to appropriate handlers
+  - Proper cleanup and unsubscription on window close
+
+- **Message Models**: Structured data models for Supabase messages
+
+  - `MessageMetadata` for message type and annotation data
+  - `SupabaseMessage` for complete message structure
+  - Support for annotation, text_response, and mixed message types
+  - JSON serialization attributes for proper deserialization
+
+- **Configuration Service**: Centralized application configuration
+
+  - Supabase URL and anon key configuration
+  - n8n API base URL and polling intervals
+  - Application name and version constants
+  - Easy configuration management for different environments
+
+- **Enhanced MainWindow**: Real-time annotation rendering
+
+  - Constructor now accepts sessionCode and sessionId parameters
+  - Automatic Supabase realtime subscription on window load
+  - Event handlers for annotation and text message reception
+  - UI thread dispatching for safe annotation rendering
+  - Proper cleanup of subscriptions on window close
+
+- **Session ID Management**: Complete session tracking
+  - StartupWindow now captures and stores sessionId from API responses
+  - SessionId passed to MainWindow for realtime subscription
+  - Enhanced polling to capture session metadata
+
+### Changed
+
+- **MainWindow Constructor**: Updated to accept session parameters
+
+  - Now requires sessionCode and sessionId for realtime functionality
+  - Maintains backward compatibility with existing functionality
+
+- **StartupWindow Flow**: Enhanced to capture and pass session metadata
+
+  - Polling now captures sessionId from API responses
+  - SessionId passed to MainWindow for realtime subscription
+  - Better integration between startup and overlay phases
+
+- **API Integration**: Enhanced session status checking
+  - SessionId now captured and stored during polling
+  - Better session metadata management
+
+### Files Modified
+
+- `src/Services/SupabaseService.cs` (created - realtime subscription management)
+- `src/Services/Configuration.cs` (created - centralized configuration)
+- `src/Models/MessageModels.cs` (created - Supabase message models)
+- `src/Views/MainWindow.xaml.cs` (updated - realtime integration)
+- `src/Views/StartupWindow.xaml.cs` (updated - sessionId handling)
+- `AITeacherAssistant.csproj` (added Supabase packages)
+
+### Dependencies Added
+
+- `supabase-csharp` (0.16.2) - Main Supabase client library
+- `realtime-csharp` (6.0.4) - Realtime WebSocket functionality
+- `postgrest-csharp` (3.5.1) - PostgreSQL REST API client
+- `gotrue-csharp` (4.2.7) - Supabase authentication
+- `supabase-storage-csharp` (1.4.0) - Supabase storage client
+- `functions-csharp` (1.3.2) - Supabase Edge Functions client
+
+---
+
 ## [Date: 2025-01-27 - Session Status Polling Implementation]
 
 ### Added

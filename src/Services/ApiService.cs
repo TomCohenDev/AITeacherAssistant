@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using AITeacherAssistant.Models;
 
 namespace AITeacherAssistant.Services;
 
@@ -151,6 +153,32 @@ public class ApiService
     }
 
     /// <summary>
+    /// Get pending annotations for session
+    /// TODO: Implement when n8n endpoint is ready
+    /// </summary>
+    /// <param name="code">5-letter session code</param>
+    /// <returns>Annotations response with pending annotations</returns>
+    public async Task<AnnotationsResponse> GetAnnotations(string code)
+    {
+        try
+        {
+            // TODO: Implement when n8n endpoint ready
+            // GET /sessions/annotations?code={code}
+            
+            await Task.Delay(100); // Placeholder
+            return new AnnotationsResponse { Success = false };
+        }
+        catch (Exception ex)
+        {
+            return new AnnotationsResponse
+            {
+                Success = false,
+                Error = ex.Message
+            };
+        }
+    }
+
+    /// <summary>
     /// Dispose of the HTTP client
     /// </summary>
     public void Dispose()
@@ -199,4 +227,19 @@ public class WebappInfo
     
     [JsonPropertyName("lastPollAt")]
     public string? LastPollAt { get; set; }
+}
+
+/// <summary>
+/// Response model for annotations API calls
+/// </summary>
+public class AnnotationsResponse
+{
+    [JsonPropertyName("success")]
+    public bool Success { get; set; }
+    
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+    
+    [JsonPropertyName("annotations")]
+    public List<AnnotationResponse>? Annotations { get; set; }
 }

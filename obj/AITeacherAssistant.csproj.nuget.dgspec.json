@@ -47,6 +47,10 @@
             "QRCoder": {
               "target": "Package",
               "version": "[1.6.0, )"
+            },
+            "supabase-csharp": {
+              "target": "Package",
+              "version": "[0.16.2, )"
             }
           },
           "imports": [
