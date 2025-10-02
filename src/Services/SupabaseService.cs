@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 using AITeacherAssistant.Models;
 
 namespace AITeacherAssistant.Services;
@@ -14,8 +15,10 @@ namespace AITeacherAssistant.Services;
 public class SupabaseService
 {
     private Client? _supabase;
+    private Timer? _pollingTimer;
     private string _sessionId = "";
     private bool _isSubscribed = false;
+    private DateTime _lastMessageTime = DateTime.MinValue;
     
     /// <summary>
     /// Fired when an annotation message is received from AI
@@ -41,6 +44,17 @@ public class SupabaseService
     {
         try
         {
+            // Validate credentials
+            if (string.IsNullOrEmpty(supabaseUrl) || supabaseUrl.Contains("YOUR_PROJECT"))
+            {
+                throw new ArgumentException("Invalid Supabase URL - please configure your Supabase project URL");
+            }
+            
+            if (string.IsNullOrEmpty(supabaseKey) || supabaseKey.Contains("YOUR_ANON_KEY"))
+            {
+                throw new ArgumentException("Invalid Supabase key - please configure your Supabase anon key");
+            }
+            
             var options = new SupabaseOptions
             {
                 AutoRefreshToken = true,
@@ -50,10 +64,11 @@ public class SupabaseService
             _supabase = new Client(supabaseUrl, supabaseKey, options);
             await _supabase.InitializeAsync();
             
-            System.Diagnostics.Debug.WriteLine("Supabase client initialized successfully");
+            System.Diagnostics.Debug.WriteLine("✓ Supabase client initialized successfully");
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"❌ Failed to initialize Supabase: {ex.Message}");
             ErrorOccurred?.Invoke(this, $"Failed to initialize Supabase: {ex.Message}");
             throw;
         }
@@ -80,12 +95,10 @@ public class SupabaseService
         
         try
         {
-            // TODO: Implement realtime subscription when Supabase API is stable
-            // For now, this is a placeholder that will be implemented when
-            // the n8n integration is ready and we have a working Supabase setup
-            
+            // Start polling for new messages every 2 seconds
+            _pollingTimer = new Timer(async _ => await PollForMessages(), null, TimeSpan.Zero, TimeSpan.FromSeconds(2));
             _isSubscribed = true;
-            System.Diagnostics.Debug.WriteLine($"Realtime subscription placeholder active for session: {sessionId}");
+            System.Diagnostics.Debug.WriteLine($"✓ Message polling active for session: {sessionId}");
         }
         catch (Exception ex)
         {
@@ -95,37 +108,61 @@ public class SupabaseService
     }
     
     /// <summary>
-    /// Handle new message received from Supabase realtime
+    /// Poll for new messages from Supabase
     /// </summary>
-    private void HandleNewMessage(Dictionary<string, object> record)
+    private async Task PollForMessages()
+    {
+        if (_supabase == null || string.IsNullOrEmpty(_sessionId))
+            return;
+
+        try
+        {
+            // Query messages table for new messages since last check
+            var response = await _supabase
+                .From<SupabaseMessage>()
+                .Where(x => x.SessionId == _sessionId && x.Role == "assistant")
+                .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                .Limit(10)
+                .Get();
+
+            if (response?.Models != null)
+            {
+                foreach (var message in response.Models)
+                {
+                    // Check if this is a new message
+                    if (DateTime.TryParse(message.CreatedAt, out var messageTime) && 
+                        messageTime > _lastMessageTime)
+                    {
+                        _lastMessageTime = messageTime;
+                        HandleNewMessage(message);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error polling messages: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Handle new message received from Supabase
+    /// </summary>
+    private void HandleNewMessage(SupabaseMessage message)
     {
         try
         {
-            // Parse message fields from the record dictionary
-            var role = record.GetValueOrDefault("role")?.ToString();
-            var content = record.GetValueOrDefault("content")?.ToString() ?? "";
-            var sessionIdValue = record.GetValueOrDefault("session_id")?.ToString();
-            
-            // Filter: Only process messages for our session from the assistant
-            if (sessionIdValue != _sessionId || role != "assistant")
-            {
-                System.Diagnostics.Debug.WriteLine($"Ignoring message: session={sessionIdValue}, role={role}");
-                return;
-            }
-            
-            System.Diagnostics.Debug.WriteLine($"Processing assistant message for session {_sessionId}");
-            
+            System.Diagnostics.Debug.WriteLine($"Processing message: {message.Id}");
+
             // Parse metadata JSON
-            var metadataObj = record.GetValueOrDefault("metadata");
-            if (metadataObj == null)
+            if (string.IsNullOrEmpty(message.MetadataJson))
             {
                 System.Diagnostics.Debug.WriteLine("No metadata in message");
                 return;
             }
             
-            // Convert metadata object to JSON string, then deserialize to our model
-            var metadataJson = JsonSerializer.Serialize(metadataObj);
-            var metadata = JsonSerializer.Deserialize<MessageMetadata>(metadataJson);
+            // Deserialize metadata
+            var metadata = JsonSerializer.Deserialize<MessageMetadata>(message.MetadataJson);
             
             if (metadata == null)
             {
@@ -152,17 +189,17 @@ public class SupabaseService
                     {
                         AnnotationReceived?.Invoke(this, metadata.Annotation);
                     }
-                    if (!string.IsNullOrEmpty(content))
+                    if (!string.IsNullOrEmpty(message.Content))
                     {
-                        TextMessageReceived?.Invoke(this, content);
+                        TextMessageReceived?.Invoke(this, message.Content);
                     }
                     break;
                     
                 case "text_response":
                     // Pure text response
-                    if (!string.IsNullOrEmpty(content))
+                    if (!string.IsNullOrEmpty(message.Content))
                     {
-                        TextMessageReceived?.Invoke(this, content);
+                        TextMessageReceived?.Invoke(this, message.Content);
                     }
                     break;
                     
@@ -183,20 +220,21 @@ public class SupabaseService
     /// </summary>
     public async Task Unsubscribe()
     {
-        if (_isSubscribed)
+        if (_pollingTimer != null && _isSubscribed)
         {
             try
             {
-                // TODO: Implement real unsubscribe when realtime is working
+                _pollingTimer.Dispose();
+                _pollingTimer = null;
                 _isSubscribed = false;
-                System.Diagnostics.Debug.WriteLine("Unsubscribed from session messages");
-                await Task.CompletedTask;
+                System.Diagnostics.Debug.WriteLine("✓ Stopped message polling");
             }
             catch (Exception ex)
             {
                 ErrorOccurred?.Invoke(this, $"Error unsubscribing: {ex.Message}");
             }
         }
+        await Task.CompletedTask;
     }
     
     /// <summary>

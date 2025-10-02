@@ -10,8 +10,8 @@ public static class Configuration
     
     // Supabase Configuration
     // TODO: Replace with your actual Supabase project URL and anon key
-    public const string SupabaseUrl = "https://YOUR_PROJECT.supabase.co";
-    public const string SupabaseAnonKey = "YOUR_ANON_KEY_HERE";
+    public const string SupabaseUrl = "https://ptgveftlpeyaqnbvcziv.supabase.co";
+    public const string SupabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0Z3ZlZnRscGV5YXFuYnZjeml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNTAzMzUsImV4cCI6MjA3NDkyNjMzNX0.X4ozAZSA4rTZC2p6EsFhTvXT9iVGIrV7QcnJPHCdsrk";
     
     // Polling Configuration
     public const int SessionPollingIntervalMs = 2500; // 2.5 seconds

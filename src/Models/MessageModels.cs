@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Postgrest.Attributes;
+using Postgrest.Models;
 
 namespace AITeacherAssistant.Models;
 
@@ -35,23 +37,31 @@ public class MessageMetadata
 /// <summary>
 /// Complete message structure from Supabase
 /// </summary>
-public class SupabaseMessage
+[Table("messages")]
+public class SupabaseMessage : BaseModel
 {
-    [JsonPropertyName("id")]
+    [PrimaryKey("id")]
+    [Column("id")]
     public string Id { get; set; } = "";
     
-    [JsonPropertyName("session_id")]
+    [Column("session_id")]
     public string SessionId { get; set; } = "";
     
-    [JsonPropertyName("role")]
+    [Column("role")]
     public string Role { get; set; } = "";
     
-    [JsonPropertyName("content")]
+    [Column("content")]
     public string Content { get; set; } = "";
     
-    [JsonPropertyName("created_at")]
+    [Column("created_at")]
     public string CreatedAt { get; set; } = "";
     
-    [JsonPropertyName("metadata")]
+    [Column("metadata")]
+    public string MetadataJson { get; set; } = "";
+    
+    /// <summary>
+    /// Parsed metadata object
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public MessageMetadata? Metadata { get; set; }
 }

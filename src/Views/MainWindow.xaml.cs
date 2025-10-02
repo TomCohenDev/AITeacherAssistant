@@ -258,6 +258,14 @@ public partial class MainWindow : Window
     {
         try
         {
+            // Check if Supabase credentials are configured
+            if (Configuration.SupabaseUrl.Contains("YOUR_PROJECT") || 
+                Configuration.SupabaseAnonKey.Contains("YOUR_ANON_KEY"))
+            {
+                System.Diagnostics.Debug.WriteLine("⚠️ Supabase credentials not configured - skipping realtime subscription");
+                return;
+            }
+            
             // Initialize Supabase client
             await _supabaseService.Initialize(
                 Configuration.SupabaseUrl,
@@ -276,12 +284,9 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
-                $"Failed to connect to realtime service:\n{ex.Message}\n\nAnnotations may not appear automatically.",
-                "Realtime Connection Warning",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning
-            );
+            System.Diagnostics.Debug.WriteLine($"⚠️ Realtime connection failed: {ex.Message}");
+            // Don't show error dialog for now - just log and continue
+            // The app will work fine without realtime (test annotations still work)
         }
     }
 
