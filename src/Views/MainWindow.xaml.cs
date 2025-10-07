@@ -26,6 +26,8 @@ public partial class MainWindow : Window
     private bool _isOverlayActive = true;
     private IntPtr _windowHandle;
     private AnnotationRenderer? _annotationRenderer;
+    private AnnotationToolManager? _toolManager;
+    private bool _toolbarVisible = true;
     private DispatcherTimer? _annotationPollingTimer;
     private readonly ApiService _apiService = new();
     private SupabaseService _supabaseService = new();
@@ -59,6 +61,11 @@ public partial class MainWindow : Window
         
         // Initialize annotation renderer
         _annotationRenderer = new AnnotationRenderer(AnnotationCanvas);
+        
+        // Initialize tool manager
+        _toolManager = new AnnotationToolManager(AnnotationCanvas);
+        _toolManager.ToolChanged += OnToolChanged;
+        _toolManager.SelectionChanged += OnSelectionChanged;
         
         // Initialize realtime subscription
         await InitializeRealtimeSubscription();
@@ -245,20 +252,99 @@ public partial class MainWindow : Window
     }
     
     /// <summary>
-    /// Test button click handler
-    /// </summary>
-    private void TestButton_Click(object sender, RoutedEventArgs e)
-    {
-        TestAnnotations();
-    }
-
-    /// <summary>
     /// Clear Screen button click handler
     /// </summary>
     private void ClearScreenButton_Click(object sender, RoutedEventArgs e)
     {
         _annotationRenderer?.ClearAnnotations();
+        _toolManager?.ClearAll();
         System.Diagnostics.Debug.WriteLine("✓ Screen cleared by user");
+    }
+
+    /// <summary>
+    /// Handle mouse down on annotation canvas
+    /// </summary>
+    private void AnnotationCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        var position = e.GetPosition(AnnotationCanvas);
+        _toolManager?.OnMouseDown(position, e);
+    }
+
+    /// <summary>
+    /// Handle mouse move on annotation canvas
+    /// </summary>
+    private void AnnotationCanvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        var position = e.GetPosition(AnnotationCanvas);
+        _toolManager?.OnMouseMove(position, e);
+    }
+
+    /// <summary>
+    /// Handle mouse up on annotation canvas
+    /// </summary>
+    private void AnnotationCanvas_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+        var position = e.GetPosition(AnnotationCanvas);
+        _toolManager?.OnMouseUp(position, e);
+    }
+
+    /// <summary>
+    /// Tool button click handlers
+    /// </summary>
+    private void SelectTool_Click(object sender, RoutedEventArgs e)
+    {
+        SetActiveTool(AnnotationTool.Select, SelectToolButton);
+    }
+
+    private void PenTool_Click(object sender, RoutedEventArgs e)
+    {
+        SetActiveTool(AnnotationTool.Pen, PenToolButton);
+    }
+
+    private void TextTool_Click(object sender, RoutedEventArgs e)
+    {
+        SetActiveTool(AnnotationTool.Text, TextToolButton);
+    }
+
+    private void ArrowTool_Click(object sender, RoutedEventArgs e)
+    {
+        SetActiveTool(AnnotationTool.Arrow, ArrowToolButton);
+    }
+
+    private void CircleTool_Click(object sender, RoutedEventArgs e)
+    {
+        SetActiveTool(AnnotationTool.Circle, CircleToolButton);
+    }
+
+    private void RectangleTool_Click(object sender, RoutedEventArgs e)
+    {
+        SetActiveTool(AnnotationTool.Rectangle, RectangleToolButton);
+    }
+
+    private void EraserTool_Click(object sender, RoutedEventArgs e)
+    {
+        SetActiveTool(AnnotationTool.Eraser, EraserToolButton);
+    }
+
+    private void SetActiveTool(AnnotationTool tool, System.Windows.Controls.Primitives.ToggleButton button)
+    {
+        // Uncheck all other tool buttons
+        SelectToolButton.IsChecked = false;
+        PenToolButton.IsChecked = false;
+        TextToolButton.IsChecked = false;
+        ArrowToolButton.IsChecked = false;
+        CircleToolButton.IsChecked = false;
+        RectangleToolButton.IsChecked = false;
+        EraserToolButton.IsChecked = false;
+        
+        // Check the selected button
+        button.IsChecked = true;
+        
+        // Set the tool
+        if (_toolManager != null)
+        {
+            _toolManager.CurrentTool = tool;
+        }
     }
 
     /// <summary>
@@ -372,7 +458,119 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Close button click handler
+    /// Color button click handler
+    /// </summary>
+    private void ColorButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button button && button.Tag is string color)
+        {
+            if (_toolManager != null)
+            {
+                _toolManager.CurrentColor = color;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Size slider value changed handler
+    /// </summary>
+    private void SizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_toolManager != null)
+        {
+            _toolManager.CurrentSize = e.NewValue;
+        }
+    }
+
+    /// <summary>
+    /// Delete button click handler
+    /// </summary>
+    private void DeleteButton_Click(object sender, RoutedEventArgs e)
+    {
+        _toolManager?.DeleteSelected();
+    }
+
+    /// <summary>
+    /// Clear all annotations button click handler
+    /// </summary>
+    private void ClearAllButton_Click(object sender, RoutedEventArgs e)
+    {
+        var result = System.Windows.MessageBox.Show(
+            "Clear all annotations?",
+            "Confirm",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+        
+        if (result == MessageBoxResult.Yes)
+        {
+            _annotationRenderer?.ClearAnnotations();
+            _toolManager?.ClearAll();
+        }
+    }
+
+    /// <summary>
+    /// Toggle toolbar visibility
+    /// </summary>
+    private void ToggleToolbar_Click(object sender, RoutedEventArgs e)
+    {
+        _toolbarVisible = !_toolbarVisible;
+        
+        if (_toolbarVisible)
+        {
+            AnnotationToolbar.Visibility = Visibility.Visible;
+            ShowToolbarButton.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            AnnotationToolbar.Visibility = Visibility.Collapsed;
+            ShowToolbarButton.Visibility = Visibility.Visible;
+        }
+    }
+
+    /// <summary>
+    /// Tool changed event handler
+    /// </summary>
+    private void OnToolChanged(object? sender, AnnotationTool tool)
+    {
+        System.Diagnostics.Debug.WriteLine($"Tool changed to: {tool}");
+    }
+
+    /// <summary>
+    /// Selection changed event handler
+    /// </summary>
+    private void OnSelectionChanged(object? sender, UIElement? element)
+    {
+        DeleteButton.IsEnabled = element != null;
+    }
+
+    /// <summary>
+    /// Close Session button click handler - returns to main menu
+    /// </summary>
+    private void CloseSessionButton_Click(object sender, RoutedEventArgs e)
+    {
+        // Show confirmation dialog
+        var result = System.Windows.MessageBox.Show(
+            "Close this session and return to main menu?",
+            "Confirm Close Session",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            // Clean up current session
+            CleanupSession();
+            
+            // Show HomePage (main menu)
+            var homePage = new HomePage();
+            homePage.Show();
+            
+            // Close this window
+            this.Close();
+        }
+    }
+
+    /// <summary>
+    /// Close App button click handler - exits application
     /// </summary>
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
@@ -389,6 +587,43 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Clean up session resources
+    /// </summary>
+    private void CleanupSession()
+    {
+        try
+        {
+            // Unsubscribe from realtime
+            _supabaseService.Unsubscribe().Wait();
+            
+            // Unsubscribe from events
+            if (_supabaseService != null)
+            {
+                _supabaseService.AnnotationReceived -= OnAnnotationReceived;
+                _supabaseService.TextMessageReceived -= OnTextMessageReceived;
+                _supabaseService.ErrorOccurred -= OnSupabaseError;
+                _supabaseService.ScreenshotRequestReceived -= OnScreenshotRequestReceived;
+            }
+            
+            // Unsubscribe from tool manager events
+            if (_toolManager != null)
+            {
+                _toolManager.ToolChanged -= OnToolChanged;
+                _toolManager.SelectionChanged -= OnSelectionChanged;
+            }
+            
+            // Stop polling timer
+            _annotationPollingTimer?.Stop();
+            
+            System.Diagnostics.Debug.WriteLine("✓ Session cleaned up successfully");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"⚠️ Error during session cleanup: {ex.Message}");
+        }
+    }
+
 
 
     /// <summary>
@@ -396,16 +631,7 @@ public partial class MainWindow : Window
     /// </summary>
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        // Unsubscribe from realtime
-        _supabaseService.Unsubscribe().Wait();
-        
-        // Unsubscribe from events
-        _supabaseService.AnnotationReceived -= OnAnnotationReceived;
-        _supabaseService.TextMessageReceived -= OnTextMessageReceived;
-        _supabaseService.ErrorOccurred -= OnSupabaseError;
-        _supabaseService.ScreenshotRequestReceived -= OnScreenshotRequestReceived;
-        
-        _annotationPollingTimer?.Stop();
+        CleanupSession();
         base.OnClosing(e);
     }
 }
