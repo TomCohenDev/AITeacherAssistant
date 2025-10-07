@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     private DispatcherTimer? _annotationPollingTimer;
     private readonly ApiService _apiService = new();
     private SupabaseService _supabaseService = new();
+    private ScreenshotService? _screenshotService;
     private string _sessionCode = "";
     private string _sessionId = "";
 
@@ -68,7 +69,7 @@ public partial class MainWindow : Window
     /// Ctrl+Shift+Q = Toggle overlay visibility
     /// Ctrl+Shift+C = Clear annotations
     /// </summary>
-    private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+    private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         // Check for Ctrl+Shift+Q
         if (e.Key == Key.Q && 
@@ -252,6 +253,15 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Clear Screen button click handler
+    /// </summary>
+    private void ClearScreenButton_Click(object sender, RoutedEventArgs e)
+    {
+        _annotationRenderer?.ClearAnnotations();
+        System.Diagnostics.Debug.WriteLine("✓ Screen cleared by user");
+    }
+
+    /// <summary>
     /// Initialize Supabase realtime subscription for this session
     /// </summary>
     private async Task InitializeRealtimeSubscription()
@@ -272,13 +282,23 @@ public partial class MainWindow : Window
                 Configuration.SupabaseAnonKey
             );
             
+            // Initialize screenshot service
+            _screenshotService = new ScreenshotService(
+                Configuration.SupabaseUrl,
+                Configuration.SupabaseAnonKey
+            );
+            
             // Subscribe to events
             _supabaseService.AnnotationReceived += OnAnnotationReceived;
             _supabaseService.TextMessageReceived += OnTextMessageReceived;
             _supabaseService.ErrorOccurred += OnSupabaseError;
+            _supabaseService.ScreenshotRequestReceived += OnScreenshotRequestReceived;
             
             // Subscribe to session messages
             await _supabaseService.SubscribeToSession(_sessionId);
+            
+            // Subscribe to screenshot requests
+            await _supabaseService.SubscribeToScreenshotRequests(_sessionId);
             
             System.Diagnostics.Debug.WriteLine($"✓ Realtime subscription active for session: {_sessionId}");
         }
@@ -335,12 +355,29 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Handle screenshot request from remote
+    /// </summary>
+    private async void OnScreenshotRequestReceived(object? sender, ScreenshotRequest request)
+    {
+        System.Diagnostics.Debug.WriteLine($"📸 Screenshot request received: {request.RequestId}");
+        
+        // Handle on background thread to avoid blocking UI
+        await Task.Run(async () =>
+        {
+            if (_screenshotService != null)
+            {
+                await _screenshotService.HandleScreenshotRequest(request.RequestId, request.SessionId);
+            }
+        });
+    }
+
+    /// <summary>
     /// Close button click handler
     /// </summary>
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         // Show confirmation dialog
-        var result = MessageBox.Show(
+        var result = System.Windows.MessageBox.Show(
             "Are you sure you want to close AI Teacher Assistant?",
             "Confirm Close",
             MessageBoxButton.YesNo,
@@ -348,7 +385,7 @@ public partial class MainWindow : Window
 
         if (result == MessageBoxResult.Yes)
         {
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
         }
     }
 
@@ -366,6 +403,7 @@ public partial class MainWindow : Window
         _supabaseService.AnnotationReceived -= OnAnnotationReceived;
         _supabaseService.TextMessageReceived -= OnTextMessageReceived;
         _supabaseService.ErrorOccurred -= OnSupabaseError;
+        _supabaseService.ScreenshotRequestReceived -= OnScreenshotRequestReceived;
         
         _annotationPollingTimer?.Stop();
         base.OnClosing(e);

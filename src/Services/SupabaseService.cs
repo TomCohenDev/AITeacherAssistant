@@ -15,10 +15,12 @@ namespace AITeacherAssistant.Services;
 public class SupabaseService
 {
     private Client? _supabase;
-    private Timer? _pollingTimer;
+    private System.Threading.Timer? _pollingTimer;
+    private System.Threading.Timer? _screenshotPollingTimer;
     private string _sessionId = "";
     private bool _isSubscribed = false;
     private DateTime _lastMessageTime = DateTime.MinValue;
+    private DateTime _lastScreenshotCheck = DateTime.MinValue;
     
     /// <summary>
     /// Fired when an annotation message is received from AI
@@ -34,6 +36,11 @@ public class SupabaseService
     /// Fired when any error occurs during realtime operations
     /// </summary>
     public event EventHandler<string>? ErrorOccurred;
+    
+    /// <summary>
+    /// Fired when a screenshot request is received
+    /// </summary>
+    public event EventHandler<ScreenshotRequest>? ScreenshotRequestReceived;
     
     /// <summary>
     /// Initialize Supabase client with credentials
@@ -96,7 +103,7 @@ public class SupabaseService
         try
         {
             // Start polling for new messages every 2 seconds
-            _pollingTimer = new Timer(async _ => await PollForMessages(), null, TimeSpan.Zero, TimeSpan.FromSeconds(2));
+            _pollingTimer = new System.Threading.Timer(async _ => await PollForMessages(), null, TimeSpan.Zero, TimeSpan.FromSeconds(2));
             _isSubscribed = true;
             System.Diagnostics.Debug.WriteLine($"✓ Message polling active for session: {sessionId}");
         }
@@ -220,13 +227,12 @@ public class SupabaseService
     /// </summary>
     public async Task Unsubscribe()
     {
-        if (_pollingTimer != null && _isSubscribed)
+        if (_pollingTimer != null)
         {
             try
             {
                 _pollingTimer.Dispose();
                 _pollingTimer = null;
-                _isSubscribed = false;
                 System.Diagnostics.Debug.WriteLine("✓ Stopped message polling");
             }
             catch (Exception ex)
@@ -234,6 +240,22 @@ public class SupabaseService
                 ErrorOccurred?.Invoke(this, $"Error unsubscribing: {ex.Message}");
             }
         }
+        
+        if (_screenshotPollingTimer != null)
+        {
+            try
+            {
+                _screenshotPollingTimer.Dispose();
+                _screenshotPollingTimer = null;
+                System.Diagnostics.Debug.WriteLine("✓ Stopped screenshot polling");
+            }
+            catch (Exception ex)
+            {
+                ErrorOccurred?.Invoke(this, $"Error unsubscribing from screenshots: {ex.Message}");
+            }
+        }
+        
+        _isSubscribed = false;
         await Task.CompletedTask;
     }
     
@@ -246,4 +268,80 @@ public class SupabaseService
     /// Get the current session ID being monitored
     /// </summary>
     public string CurrentSessionId => _sessionId;
+    
+    /// <summary>
+    /// Subscribe to screenshot requests for this session
+    /// </summary>
+    public async Task SubscribeToScreenshotRequests(string sessionId)
+    {
+        if (_supabase == null) return;
+        
+        try
+        {
+            // Start polling for screenshot requests every 2 seconds
+            _screenshotPollingTimer = new System.Threading.Timer(
+                async _ => await PollForScreenshotRequests(sessionId), 
+                null, 
+                TimeSpan.Zero, 
+                TimeSpan.FromSeconds(2));
+                
+            System.Diagnostics.Debug.WriteLine($"✓ Screenshot request polling active");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error starting screenshot polling: {ex.Message}");
+        }
+        
+        await Task.CompletedTask;
+    }
+    
+    /// <summary>
+    /// Poll for pending screenshot requests
+    /// </summary>
+    private async Task PollForScreenshotRequests(string sessionId)
+    {
+        if (_supabase == null) return;
+        
+        try
+        {
+            var response = await _supabase
+                .From<ScreenshotRequestModel>()
+                .Where(x => x.SessionId == sessionId && x.Status == "pending")
+                .Order(x => x.RequestedAt, Postgrest.Constants.Ordering.Descending)
+                .Limit(1)
+                .Get();
+            
+            if (response?.Models != null && response.Models.Count > 0)
+            {
+                var request = response.Models[0];
+                
+                // Check if this is a new request
+                if (DateTime.TryParse(request.RequestedAt, out var requestTime) &&
+                    requestTime > _lastScreenshotCheck)
+                {
+                    _lastScreenshotCheck = requestTime;
+                    
+                    // Fire event
+                    ScreenshotRequestReceived?.Invoke(this, new ScreenshotRequest
+                    {
+                        RequestId = request.Id,
+                        SessionId = request.SessionId
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error polling screenshot requests: {ex.Message}");
+        }
+    }
+}
+
+/// <summary>
+/// Screenshot request data
+/// </summary>
+public class ScreenshotRequest
+{
+    public string RequestId { get; set; } = "";
+    public string SessionId { get; set; } = "";
 }

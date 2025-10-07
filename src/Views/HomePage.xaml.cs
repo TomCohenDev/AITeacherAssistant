@@ -52,7 +52,7 @@ public partial class HomePage : Window
             else
             {
                 // Show error message with more details
-                MessageBox.Show(
+                System.Windows.MessageBox.Show(
                     $"Failed to create session with code: {sessionCode}\n\n" +
                     "Please check your internet connection and try again.\n\n" +
                     "If the problem persists, please check the Debug output for more details.",
@@ -68,7 +68,7 @@ public partial class HomePage : Window
         catch (Exception ex)
         {
             // Handle unexpected errors
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"An unexpected error occurred: {ex.Message}",
                 "Error",
                 MessageBoxButton.OK,
@@ -144,7 +144,7 @@ public partial class HomePage : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"Unable to open link: {ex.Message}",
                 "Error",
                 MessageBoxButton.OK,
@@ -158,7 +158,7 @@ public partial class HomePage : Window
     /// <param name="error">Error message</param>
     private void HandleApiError(string error)
     {
-        MessageBox.Show(
+        System.Windows.MessageBox.Show(
             $"API Error: {error}",
             "Connection Error",
             MessageBoxButton.OK,

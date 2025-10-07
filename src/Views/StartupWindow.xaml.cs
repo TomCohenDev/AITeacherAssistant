@@ -62,7 +62,7 @@ public partial class StartupWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error generating QR code: {ex.Message}", "Error", 
+            System.Windows.MessageBox.Show($"Error generating QR code: {ex.Message}", "Error", 
                           MessageBoxButton.OK, MessageBoxImage.Error);
         }
         
@@ -157,7 +157,7 @@ public partial class StartupWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error starting overlay: {ex.Message}", "Error", 
+            System.Windows.MessageBox.Show($"Error starting overlay: {ex.Message}", "Error", 
                           MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -182,7 +182,7 @@ public partial class StartupWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error returning to menu: {ex.Message}", "Error", 
+            System.Windows.MessageBox.Show($"Error returning to menu: {ex.Message}", "Error", 
                           MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -290,7 +290,7 @@ public partial class StartupWindow : Window
             BackToMenuButton.Visibility = Visibility.Visible;
             
             // Show message and return to menu after OK is clicked
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 "No user connected within 5 minutes.",
                 "Connection Timeout",
                 MessageBoxButton.OK,

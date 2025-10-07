@@ -38,16 +38,28 @@
                                FontSize="14" 
                                Margin="0,0,0,10"/>
                     
-                    <TextBlock Text="Press Ctrl+Shift+Q to toggle overlay" 
-                               Foreground="LightGray" 
+                    <TextBlock Foreground="LightGray" 
                                FontSize="10" 
                                TextWrapping="Wrap"
                                MaxWidth="200"
-                               Margin="0,0,0,10"/>
+                               Margin="0,0,0,10">
+                        <Run Text="Ctrl+Shift+Q: Toggle overlay"/><LineBreak/>
+                        <Run Text="Ctrl+Shift+C: Clear screen"/>
+                    </TextBlock>
                     
                     <Button x:Name="TestAnnotationsButton" 
                             Content="Test Annotations" 
                             Click="TestButton_Click"
+                            Background="#CC2E2E2E"
+                            Foreground="White"
+                            BorderBrush="Gray"
+                            Padding="8,4"
+                            Cursor="Hand"
+                            Margin="0,0,0,5"/>
+                    
+                    <Button x:Name="ClearScreenButton" 
+                            Content="Clear Screen" 
+                            Click="ClearScreenButton_Click"
                             Background="#CC2E2E2E"
                             Foreground="White"
                             BorderBrush="Gray"

@@ -151,7 +151,7 @@ public class AnnotationRenderer
         }
         else
         {
-            ellipse.Fill = Brushes.Transparent;
+            ellipse.Fill = System.Windows.Media.Brushes.Transparent;
         }
         
         Canvas.SetLeft(ellipse, element.Center.X - element.Radius.Value);
@@ -160,9 +160,9 @@ public class AnnotationRenderer
         return ellipse;
     }
     
-    private Rectangle CreateRectangle(AnnotationElement element)
+    private System.Windows.Shapes.Rectangle CreateRectangle(AnnotationElement element)
     {
-        var rect = new Rectangle
+        var rect = new System.Windows.Shapes.Rectangle
         {
             Width = element.Width ?? 100,
             Height = element.Height ?? 50,
@@ -176,7 +176,7 @@ public class AnnotationRenderer
         }
         else
         {
-            rect.Fill = Brushes.Transparent;
+            rect.Fill = System.Windows.Media.Brushes.Transparent;
         }
         
         Canvas.SetLeft(rect, element.X ?? 0);
@@ -235,15 +235,15 @@ public class AnnotationRenderer
     /// <summary>
     /// Parse hex color string to WPF Brush
     /// </summary>
-    private Brush ParseColor(string hexColor)
+    private System.Windows.Media.Brush ParseColor(string hexColor)
     {
         try
         {
-            return (Brush)new BrushConverter().ConvertFrom(hexColor)!;
+            return (System.Windows.Media.Brush)new BrushConverter().ConvertFrom(hexColor)!;
         }
         catch
         {
-            return Brushes.Black;
+            return System.Windows.Media.Brushes.Black;
         }
     }
 }
