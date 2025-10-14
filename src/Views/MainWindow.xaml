@@ -48,6 +48,15 @@
                     MouseMove="AnnotationCanvas_MouseMove"
                     MouseUp="AnnotationCanvas_MouseUp"/>
             
+            <!-- GRID OVERLAY CANVAS (For Debugging) -->
+            <Canvas x:Name="GridOverlayCanvas"
+                    Width="1920"
+                    Height="1080"
+                    Background="Transparent"
+                    Visibility="Collapsed"
+                    IsHitTestVisible="False"
+                    Opacity="0.7"/>
+            
             <!-- ANNOTATION TOOLBAR (Left Side) -->
             <Border x:Name="AnnotationToolbar"
                     HorizontalAlignment="Left"
@@ -265,6 +274,16 @@
                             Click="ClearScreenButton_Click"
                             Background="#CC2E2E2E"
                             Foreground="White"
+                            BorderBrush="Gray"
+                            Padding="8,4"
+                            Cursor="Hand"
+                            Margin="0,0,0,5"/>
+                    
+                    <Button x:Name="ShowGridButton" 
+                            Content="Show Grid (Ctrl+G)" 
+                            Click="ShowGridButton_Click"
+                            Background="#CC2E2E2E"
+                            Foreground="#FFD700"
                             BorderBrush="Gray"
                             Padding="8,4"
                             Cursor="Hand"

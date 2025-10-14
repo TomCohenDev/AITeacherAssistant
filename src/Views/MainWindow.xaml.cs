@@ -27,6 +27,7 @@ public partial class MainWindow : Window
     private IntPtr _windowHandle;
     private AnnotationRenderer? _annotationRenderer;
     private AnnotationToolManager? _toolManager;
+    private GridOverlayService? _gridOverlayService;
     private bool _toolbarVisible = true;
     private DispatcherTimer? _annotationPollingTimer;
     private readonly ApiService _apiService = new();
@@ -67,6 +68,9 @@ public partial class MainWindow : Window
         _toolManager.ToolChanged += OnToolChanged;
         _toolManager.SelectionChanged += OnSelectionChanged;
         
+        // Initialize grid overlay service
+        _gridOverlayService = new GridOverlayService(GridOverlayCanvas);
+        
         // Initialize realtime subscription
         await InitializeRealtimeSubscription();
     }
@@ -75,6 +79,7 @@ public partial class MainWindow : Window
     /// Handle keyboard shortcuts
     /// Ctrl+Shift+Q = Toggle overlay visibility
     /// Ctrl+Shift+C = Clear annotations
+    /// Ctrl+G = Toggle grid overlay
     /// </summary>
     private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
@@ -91,6 +96,14 @@ public partial class MainWindow : Window
             Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
         {
             _annotationRenderer?.ClearAnnotations();
+            e.Handled = true;
+        }
+        
+        // Check for Ctrl+G
+        if (e.Key == Key.G && 
+            Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            ToggleGridOverlay();
             e.Handled = true;
         }
     }
@@ -259,6 +272,30 @@ public partial class MainWindow : Window
         _annotationRenderer?.ClearAnnotations();
         _toolManager?.ClearAll();
         System.Diagnostics.Debug.WriteLine("✓ Screen cleared by user");
+    }
+
+    /// <summary>
+    /// Show Grid button click handler
+    /// </summary>
+    private void ShowGridButton_Click(object sender, RoutedEventArgs e)
+    {
+        ToggleGridOverlay();
+    }
+
+    /// <summary>
+    /// Toggle grid overlay visibility
+    /// </summary>
+    private void ToggleGridOverlay()
+    {
+        if (_gridOverlayService != null)
+        {
+            _gridOverlayService.ToggleGrid();
+            
+            // Update button text based on grid state
+            ShowGridButton.Content = _gridOverlayService.IsGridVisible 
+                ? "Hide Grid (Ctrl+G)" 
+                : "Show Grid (Ctrl+G)";
+        }
     }
 
     /// <summary>
