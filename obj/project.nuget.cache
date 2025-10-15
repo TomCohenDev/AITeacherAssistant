@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "5thGjJIgXN8=",
+  "dgSpecHash": "QopePVNX500=",
   "success": true,
   "projectFilePath": "C:\\Users\\tomco\\github\\ita\\AITeacherAssistant\\AITeacherAssistant.csproj",
   "expectedPackageFiles": [
@@ -10,6 +10,7 @@
     "C:\\Users\\tomco\\.nuget\\packages\\microsoft.identitymodel.jsonwebtokens\\7.0.3\\microsoft.identitymodel.jsonwebtokens.7.0.3.nupkg.sha512",
     "C:\\Users\\tomco\\.nuget\\packages\\microsoft.identitymodel.logging\\7.0.3\\microsoft.identitymodel.logging.7.0.3.nupkg.sha512",
     "C:\\Users\\tomco\\.nuget\\packages\\microsoft.identitymodel.tokens\\7.0.3\\microsoft.identitymodel.tokens.7.0.3.nupkg.sha512",
+    "C:\\Users\\tomco\\.nuget\\packages\\microsoft.net.illink.tasks\\9.0.9\\microsoft.net.illink.tasks.9.0.9.nupkg.sha512",
     "C:\\Users\\tomco\\.nuget\\packages\\microsoft.win32.systemevents\\9.0.9\\microsoft.win32.systemevents.9.0.9.nupkg.sha512",
     "C:\\Users\\tomco\\.nuget\\packages\\mimemapping\\2.0.0\\mimemapping.2.0.0.nupkg.sha512",
     "C:\\Users\\tomco\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
@@ -23,7 +24,10 @@
     "C:\\Users\\tomco\\.nuget\\packages\\system.identitymodel.tokens.jwt\\7.0.3\\system.identitymodel.tokens.jwt.7.0.3.nupkg.sha512",
     "C:\\Users\\tomco\\.nuget\\packages\\system.reactive\\5.0.0\\system.reactive.5.0.0.nupkg.sha512",
     "C:\\Users\\tomco\\.nuget\\packages\\system.threading.channels\\5.0.0\\system.threading.channels.5.0.0.nupkg.sha512",
-    "C:\\Users\\tomco\\.nuget\\packages\\websocket.client\\4.6.1\\websocket.client.4.6.1.nupkg.sha512"
+    "C:\\Users\\tomco\\.nuget\\packages\\websocket.client\\4.6.1\\websocket.client.4.6.1.nupkg.sha512",
+    "C:\\Users\\tomco\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\9.0.9\\microsoft.netcore.app.runtime.win-x64.9.0.9.nupkg.sha512",
+    "C:\\Users\\tomco\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\9.0.9\\microsoft.windowsdesktop.app.runtime.win-x64.9.0.9.nupkg.sha512",
+    "C:\\Users\\tomco\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\9.0.9\\microsoft.aspnetcore.app.runtime.win-x64.9.0.9.nupkg.sha512"
   ],
   "logs": []
 }
