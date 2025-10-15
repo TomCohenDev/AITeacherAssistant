@@ -68,8 +68,13 @@ public class AnnotationRenderer
         {
             Text = element.Content ?? "",
             FontSize = element.FontSize ?? 16,
-            Foreground = ParseColor(element.Color ?? "#000000")
+            Foreground = ParseColor(element.Color ?? "#000000"),
+            TextWrapping = TextWrapping.Wrap
         };
+        
+        // Set maxWidth from JSON, default to 1800 if not specified
+        var maxWidth = element.MaxWidth ?? 1800;
+        textBlock.MaxWidth = maxWidth;
         
         if (element.FontWeight == "bold")
         {

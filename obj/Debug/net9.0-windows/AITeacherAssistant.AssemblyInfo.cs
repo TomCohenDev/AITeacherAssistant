@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AITeacherAssistant")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0192fad140a77398a1788c989632981fc2e6e2b5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14361dfe4992ad5a9926f10fc58c8c189cf5b90f")]
 [assembly: System.Reflection.AssemblyProductAttribute("AITeacherAssistant")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AITeacherAssistant")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

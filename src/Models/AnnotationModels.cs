@@ -26,6 +26,9 @@ public class AnnotationElement
     [JsonPropertyName("fontWeight")]
     public string? FontWeight { get; set; }
     
+    [JsonPropertyName("maxWidth")]
+    public double? MaxWidth { get; set; }
+    
     // Position properties
     [JsonPropertyName("x")]
     public double? X { get; set; }

@@ -27,7 +27,7 @@ public partial class MainWindow : Window
     private IntPtr _windowHandle;
     private AnnotationRenderer? _annotationRenderer;
     private AnnotationToolManager? _toolManager;
-    private GridOverlayService? _gridOverlayService;
+    private MarkerOverlayService? _markerOverlayService;
     private bool _toolbarVisible = true;
     private DispatcherTimer? _annotationPollingTimer;
     private readonly ApiService _apiService = new();
@@ -68,8 +68,8 @@ public partial class MainWindow : Window
         _toolManager.ToolChanged += OnToolChanged;
         _toolManager.SelectionChanged += OnSelectionChanged;
         
-        // Initialize grid overlay service
-        _gridOverlayService = new GridOverlayService(GridOverlayCanvas);
+        // Initialize marker overlay service
+        _markerOverlayService = new MarkerOverlayService(MarkerOverlayCanvas);
         
         // Initialize realtime subscription
         await InitializeRealtimeSubscription();
@@ -79,7 +79,7 @@ public partial class MainWindow : Window
     /// Handle keyboard shortcuts
     /// Ctrl+Shift+Q = Toggle overlay visibility
     /// Ctrl+Shift+C = Clear annotations
-    /// Ctrl+G = Toggle grid overlay
+    /// Ctrl+M = Toggle marker overlay
     /// </summary>
     private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
@@ -99,11 +99,11 @@ public partial class MainWindow : Window
             e.Handled = true;
         }
         
-        // Check for Ctrl+G
-        if (e.Key == Key.G && 
+        // Check for Ctrl+M
+        if (e.Key == Key.M && 
             Keyboard.Modifiers == ModifierKeys.Control)
         {
-            ToggleGridOverlay();
+            ToggleMarkerOverlay();
             e.Handled = true;
         }
     }
@@ -275,26 +275,26 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Show Grid button click handler
+    /// Show Markers button click handler
     /// </summary>
-    private void ShowGridButton_Click(object sender, RoutedEventArgs e)
+    private void ShowMarkersButton_Click(object sender, RoutedEventArgs e)
     {
-        ToggleGridOverlay();
+        ToggleMarkerOverlay();
     }
 
     /// <summary>
-    /// Toggle grid overlay visibility
+    /// Toggle marker overlay visibility
     /// </summary>
-    private void ToggleGridOverlay()
+    private void ToggleMarkerOverlay()
     {
-        if (_gridOverlayService != null)
+        if (_markerOverlayService != null)
         {
-            _gridOverlayService.ToggleGrid();
+            _markerOverlayService.ToggleMarkers();
             
-            // Update button text based on grid state
-            ShowGridButton.Content = _gridOverlayService.IsGridVisible 
-                ? "Hide Grid (Ctrl+G)" 
-                : "Show Grid (Ctrl+G)";
+            // Update button text based on marker state
+            ShowMarkersButton.Content = _markerOverlayService.MarkersVisible 
+                ? "Hide Markers (Ctrl+M)" 
+                : "Show Markers (Ctrl+M)";
         }
     }
 

@@ -48,14 +48,14 @@
                     MouseMove="AnnotationCanvas_MouseMove"
                     MouseUp="AnnotationCanvas_MouseUp"/>
             
-            <!-- GRID OVERLAY CANVAS (For Debugging) -->
-            <Canvas x:Name="GridOverlayCanvas"
+            <!-- MARKER OVERLAY CANVAS (For AI Calibration) -->
+            <Canvas x:Name="MarkerOverlayCanvas"
                     Width="1920"
                     Height="1080"
                     Background="Transparent"
                     Visibility="Collapsed"
                     IsHitTestVisible="False"
-                    Opacity="0.7"/>
+                    Panel.ZIndex="100"/>
             
             <!-- ANNOTATION TOOLBAR (Left Side) -->
             <Border x:Name="AnnotationToolbar"
@@ -279,11 +279,11 @@
                             Cursor="Hand"
                             Margin="0,0,0,5"/>
                     
-                    <Button x:Name="ShowGridButton" 
-                            Content="Show Grid (Ctrl+G)" 
-                            Click="ShowGridButton_Click"
+                    <Button x:Name="ShowMarkersButton" 
+                            Content="Show Markers (Ctrl+M)" 
+                            Click="ShowMarkersButton_Click"
                             Background="#CC2E2E2E"
-                            Foreground="#FFD700"
+                            Foreground="#00FFFF"
                             BorderBrush="Gray"
                             Padding="8,4"
                             Cursor="Hand"
